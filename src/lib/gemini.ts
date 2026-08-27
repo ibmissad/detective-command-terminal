@@ -1,5 +1,5 @@
 const ACTIVE_MODEL =
-  (import.meta.env["VITE_GEMINI_MODEL"] as string | undefined) ?? "gemini-2.5-flash";
+  (import.meta.env["VITE_GEMINI_MODEL"] as string | undefined) ?? "gemini-3.6-flash";
 
 const ENDPOINT =
   `https://generativelanguage.googleapis.com/v1beta/models/${ACTIVE_MODEL}:generateContent`;
