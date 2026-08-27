@@ -4,9 +4,11 @@ import { callGemini, extractJson } from "@/lib/gemini";
 import type { CaseFile } from "@/lib/case-types";
 import { DEFAULT_CASE } from "@/lib/default-case";
 import { ApiKeyDialog } from "./ApiKeyDialog";
+import { DatabaseConfigDialog } from "./DatabaseConfigDialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { saveCase } from "@/lib/db";
 import { EyeOff, Eye, RotateCcw, Wand2 } from "lucide-react";
 
 const GEN_PROMPT = `You are the Game Master engine for a live detective club. Given a case concept, invent a complete, internally consistent mystery.
@@ -54,6 +56,9 @@ export function GameMasterConsole() {
       setCaseFile(parsed);
       resetSession();
       toast.success(`Case loaded: ${parsed.title}`);
+      void saveCase(parsed)
+        .then((r) => r && toast.success("Case archived to your database."))
+        .catch((e) => toast.error(`Database save failed: ${e.message}`));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Generation failed.");
     } finally {
@@ -66,7 +71,10 @@ export function GameMasterConsole() {
       <section className="panel rounded-md p-6">
         <div className="flex items-center justify-between">
           <span className="label-caps">Game Master · Case Forge</span>
-          <ApiKeyDialog />
+          <div className="flex gap-2">
+            <DatabaseConfigDialog />
+            <ApiKeyDialog />
+          </div>
         </div>
         <h2 className="mt-2 text-2xl text-gold">Generate a new mystery</h2>
         <p className="mt-2 text-base text-muted-foreground">
@@ -99,6 +107,21 @@ export function GameMasterConsole() {
           </Button>
           <Button variant="ghost" size="lg" onClick={resetSession}>
             Reset session
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() =>
+              void saveCase(caseFile)
+                .then((r) =>
+                  r
+                    ? toast.success("Current case archived.")
+                    : toast.error("Connect a database first."),
+                )
+                .catch((e) => toast.error(`Database save failed: ${e.message}`)),
+            }
+          >
+            Archive current case
           </Button>
         </div>
       </section>

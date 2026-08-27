@@ -3,6 +3,7 @@ import { useCase } from "@/lib/case-store";
 import { callGemini, type GeminiTurn } from "@/lib/gemini";
 import type { ChatMessage, Suspect } from "@/lib/case-types";
 import { ApiKeyDialog } from "./ApiKeyDialog";
+import { DatabaseConfigDialog } from "./DatabaseConfigDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { saveInterrogation } from "@/lib/db";
 import { Send, Trash2, UserSearch } from "lucide-react";
 
 function systemFor(suspect: Suspect, caseTitle: string, overview: string) {
@@ -87,6 +89,12 @@ export function InterrogationTerminal() {
         [suspect.id]: [...(p[suspect.id] ?? []), { id: `${Date.now()}-a`, role: "suspect", text: reply }],
       }));
       addLog(`Interrogation · ${suspect.name}`, `Q: ${question}\nA: ${reply}`);
+      void saveInterrogation({
+        caseTitle: caseFile.title,
+        suspectName: suspect.name,
+        question,
+        answer: reply,
+      }).catch((e) => toast.error(`Database log failed: ${e.message}`));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Interrogation failed.");
     } finally {
@@ -125,6 +133,7 @@ export function InterrogationTerminal() {
               <Trash2 className="mr-1 h-4 w-4" /> Clear
             </Button>
             <ApiKeyDialog />
+            <DatabaseConfigDialog />
           </div>
         </div>
 
