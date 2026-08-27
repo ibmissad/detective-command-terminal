@@ -1,5 +1,8 @@
+const ACTIVE_MODEL =
+  (import.meta.env["VITE_GEMINI_MODEL"] as string | undefined) ?? "gemini-2.5-flash";
+
 const ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  `https://generativelanguage.googleapis.com/v1beta/models/${ACTIVE_MODEL}:generateContent`;
 
 export type GeminiTurn = { role: "user" | "model"; text: string };
 
