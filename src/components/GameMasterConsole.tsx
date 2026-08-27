@@ -31,8 +31,14 @@ export function GameMasterConsole() {
   const [revealed, setRevealed] = useState(false);
 
   const generate = async () => {
-    if (!concept.trim()) return toast.error("Enter a case concept first.");
-    if (!apiKey) return toast.error("Add your Gemini API key first.");
+    if (!concept.trim()) {
+      toast.error("Enter a case concept first.");
+      return;
+    }
+    if (!apiKey) {
+      toast.error("Add your Gemini API key first.");
+      return;
+    }
     setBusy(true);
     try {
       const raw = await callGemini(

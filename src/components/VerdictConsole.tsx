@@ -34,7 +34,10 @@ export function VerdictConsole() {
   const cracked = results ? results.culprit && (results.motive || results.keyEvidence) : false;
 
   const submit = () => {
-    if (!form.culprit.trim()) return toast.error("Name a culprit before submitting.");
+    if (!form.culprit.trim()) {
+      toast.error("Name a culprit before submitting.");
+      return;
+    }
     setVerdict(form);
     addLog(
       "Verdict filed",
