@@ -111,15 +111,16 @@ export function GameMasterConsole() {
           <Button
             variant="outline"
             size="lg"
-            onClick={() =>
+            onClick={() => {
               void saveCase(caseFile)
                 .then((r) =>
                   r
                     ? toast.success("Current case archived.")
                     : toast.error("Connect a database first."),
                 )
-                .catch((e) => toast.error(`Database save failed: ${e.message}`)),
-            }
+                .catch((e) => toast.error(`Database save failed: ${e.message}`));
+            }}
+
           >
             Archive current case
           </Button>
