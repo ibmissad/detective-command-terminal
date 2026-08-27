@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Gavel, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { saveVerdict } from "@/lib/db";
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z ]/g, "").trim();
 
@@ -39,6 +40,12 @@ export function VerdictConsole() {
       return;
     }
     setVerdict(form);
+    const wasCracked =
+      matches(form.culprit, sol.culprit) &&
+      (matches(form.motive, sol.motive) || matches(form.keyEvidence, sol.keyEvidence));
+    void saveVerdict({ ...form, caseTitle: caseFile.title, cracked: wasCracked })
+      .then((r) => r && toast.success("Verdict archived to your database."))
+      .catch((e) => toast.error(`Database save failed: ${e.message}`));
     addLog(
       "Verdict filed",
       `Culprit: ${form.culprit} · Motive: ${form.motive} · Weapon: ${form.weapon} · Evidence: ${form.keyEvidence}`,
