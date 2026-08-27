@@ -1,24 +1,76 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CaseProvider } from "@/lib/case-store";
+import { CommandHeader } from "@/components/CommandHeader";
+import { CaseBriefing } from "@/components/CaseBriefing";
+import { InterrogationTerminal } from "@/components/InterrogationTerminal";
+import { GameMasterConsole } from "@/components/GameMasterConsole";
+import { VerdictConsole } from "@/components/VerdictConsole";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Sherlock Command Center — Live Detective Club Console" },
+      {
+        name: "description",
+        content:
+          "A projector-ready noir command center for detective clubs: case briefings, interactive scene hotspots, AI suspect interrogations, and a verdict reveal.",
+      },
+      { property: "og:title", content: "Sherlock Command Center" },
+      {
+        property: "og:description",
+        content:
+          "Run live detective club meetings: case files, scene hotspots, AI interrogations, and instant verdict post-mortems.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const TABS = [
+  { value: "briefing", label: "Case Briefing" },
+  { value: "interrogation", label: "Interrogation" },
+  { value: "verdict", label: "Verdict" },
+  { value: "gm", label: "Game Master" },
+];
+
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <CaseProvider>
+      <div className="min-h-screen">
+        <CommandHeader />
+        <main className="mx-auto max-w-[110rem] px-6 py-8">
+          <Tabs defaultValue="briefing">
+            <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0">
+              {TABS.map((t) => (
+                <TabsTrigger
+                  key={t.value}
+                  value={t.value}
+                  className="rounded-none border-b-2 border-transparent px-6 py-3 font-mono text-sm uppercase tracking-[0.18em] text-muted-foreground data-[state=active]:border-gold data-[state=active]:bg-transparent data-[state=active]:text-gold data-[state=active]:shadow-none"
+                >
+                  {t.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <div className="mt-8">
+              <TabsContent value="briefing">
+                <CaseBriefing />
+              </TabsContent>
+              <TabsContent value="interrogation">
+                <InterrogationTerminal />
+              </TabsContent>
+              <TabsContent value="verdict">
+                <VerdictConsole />
+              </TabsContent>
+              <TabsContent value="gm">
+                <GameMasterConsole />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </main>
+      </div>
+    </CaseProvider>
   );
 }
