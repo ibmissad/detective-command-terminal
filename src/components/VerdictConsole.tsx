@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Gavel, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { saveVerdict } from "@/lib/db";
+import { useRoom } from "@/lib/room";
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z ]/g, "").trim();
 
@@ -21,6 +22,7 @@ function matches(guess: string, truth: string) {
 
 export function VerdictConsole() {
   const { caseFile, verdict, setVerdict, addLog } = useCase();
+  const { roomId } = useRoom();
   const [form, setForm] = useState({ culprit: "", motive: "", weapon: "", keyEvidence: "" });
 
   const sol = caseFile.solution;
@@ -43,7 +45,7 @@ export function VerdictConsole() {
     const wasCracked =
       matches(form.culprit, sol.culprit) &&
       (matches(form.motive, sol.motive) || matches(form.keyEvidence, sol.keyEvidence));
-    void saveVerdict({ ...form, caseTitle: caseFile.title, cracked: wasCracked })
+    void saveVerdict({ ...form, caseTitle: caseFile.title, cracked: wasCracked, roomCode: roomId })
       .then((r) => r && toast.success("Verdict archived to your database."))
       .catch((e) => toast.error(`Database save failed: ${e.message}`));
     addLog(

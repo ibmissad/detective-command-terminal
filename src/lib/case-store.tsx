@@ -4,11 +4,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { CaseFile, LogEntry, Verdict } from "./case-types";
 import { DEFAULT_CASE } from "./default-case";
+import { useRoom } from "./room";
+
 
 const KEY_CASE = "scc.case";
 const KEY_LOG = "scc.log";
@@ -79,18 +82,66 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(key, JSON.stringify(value));
   }, []);
 
-  const addLog = useCallback(
-    (source: string, text: string) => {
+  const { publish, on, isHost } = useRoom();
+  const stateRef = useRef({ caseFile, log, unlocked });
+  stateRef.current = { caseFile, log, unlocked };
+
+  const appendLog = useCallback(
+    (entry: LogEntry) => {
       setLog((prev) => {
-        const next = [
-          ...prev,
-          { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ts: Date.now(), source, text },
-        ];
+        if (prev.some((e) => e.id === entry.id)) return prev;
+        const next = [...prev, entry];
         persist(KEY_LOG, next);
         return next;
       });
     },
     [persist],
+  );
+
+  const addLog = useCallback(
+    (source: string, text: string) => {
+      const entry: LogEntry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        ts: Date.now(),
+        source,
+        text,
+      };
+      appendLog(entry);
+      publish({ type: "log", entry });
+    },
+    [appendLog, publish],
+  );
+
+  useEffect(
+    () =>
+      on((e) => {
+        if (e.type === "log") appendLog(e.entry);
+        else if (e.type === "hotspot")
+          setUnlocked((prev) => {
+            if (prev.includes(e.id)) return prev;
+            const next = [...prev, e.id];
+            persist(KEY_UNLOCKED, next);
+            return next;
+          });
+        else if (e.type === "case") {
+          setCaseFileState(e.caseFile);
+          persist(KEY_CASE, e.caseFile);
+        } else if (e.type === "verdict") {
+          setVerdictState(e.verdict);
+          persist(KEY_VERDICT, e.verdict);
+        } else if (e.type === "sync-request" && isHost) {
+          const s = stateRef.current;
+          publish({ type: "sync-state", caseFile: s.caseFile, log: s.log, unlocked: s.unlocked });
+        } else if (e.type === "sync-state" && !isHost) {
+          setCaseFileState(e.caseFile);
+          setLog(e.log);
+          setUnlocked(e.unlocked);
+          persist(KEY_CASE, e.caseFile);
+          persist(KEY_LOG, e.log);
+          persist(KEY_UNLOCKED, e.unlocked);
+        }
+      }),
+    [on, publish, isHost, appendLog, persist],
   );
 
   const value = useMemo<Ctx>(
@@ -99,6 +150,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setCaseFile: (c) => {
         setCaseFileState(c);
         persist(KEY_CASE, c);
+        publish({ type: "case", caseFile: c });
       },
       log,
       addLog,
@@ -107,13 +159,15 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         persist(KEY_LOG, []);
       },
       unlocked,
-      unlock: (id) =>
+      unlock: (id) => {
         setUnlocked((prev) => {
           if (prev.includes(id)) return prev;
           const next = [...prev, id];
           persist(KEY_UNLOCKED, next);
           return next;
-        }),
+        });
+        publish({ type: "hotspot", id, label: "", detail: "", by: "" });
+      },
       apiKey,
       setApiKey: (k) => {
         setApiKeyState(k);
@@ -129,6 +183,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setVerdict: (v) => {
         setVerdictState(v);
         persist(KEY_VERDICT, v);
+        publish({ type: "verdict", verdict: v });
       },
       resetSession: () => {
         setLog([]);
@@ -142,7 +197,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         persist(KEY_START, s);
       },
     }),
-    [caseFile, log, unlocked, apiKey, verdict, now, startedAt, hydrated, addLog, persist],
+    [caseFile, log, unlocked, apiKey, verdict, now, startedAt, hydrated, addLog, persist, publish],
   );
 
   return <CaseContext.Provider value={value}>{children}</CaseContext.Provider>;

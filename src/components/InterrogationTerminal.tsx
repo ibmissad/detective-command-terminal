@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCase } from "@/lib/case-store";
+import { useRoom } from "@/lib/room";
 import { callGemini, type GeminiTurn } from "@/lib/gemini";
 import type { ChatMessage, Suspect } from "@/lib/case-types";
 import { ApiKeyDialog } from "./ApiKeyDialog";
@@ -39,6 +40,7 @@ RULES:
 
 export function InterrogationTerminal() {
   const { caseFile, apiKey, addLog } = useCase();
+  const { alias, roomId, publish, on } = useRoom();
   const [suspectId, setSuspectId] = useState(caseFile.suspects[0]?.id ?? "");
   const [threads, setThreads] = useState<Record<string, ChatMessage[]>>({});
   const [input, setInput] = useState("");
@@ -57,6 +59,19 @@ export function InterrogationTerminal() {
     }
   }, [caseFile.suspects, suspectId]);
 
+  useEffect(
+    () =>
+      on((e) => {
+        if (e.type !== "chat") return;
+        setThreads((p) => {
+          const cur = p[e.suspectId] ?? [];
+          if (cur.some((m) => m.id === e.message.id)) return p;
+          return { ...p, [e.suspectId]: [...cur, e.message] };
+        });
+      }),
+    [on],
+  );
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, busy]);
@@ -69,8 +84,14 @@ export function InterrogationTerminal() {
       return;
     }
 
-    const mine: ChatMessage = { id: `${Date.now()}-q`, role: "investigator", text: question };
+    const mine: ChatMessage = {
+      id: `${Date.now()}-q-${Math.random().toString(36).slice(2, 7)}`,
+      role: "investigator",
+      text: question,
+      author: alias || "Detective",
+    };
     setThreads((p) => ({ ...p, [suspect.id]: [...(p[suspect.id] ?? []), mine] }));
+    publish({ type: "chat", suspectId: suspect.id, message: mine });
     setInput("");
     setBusy(true);
 
@@ -84,16 +105,22 @@ export function InterrogationTerminal() {
         systemFor(suspect, caseFile.title, caseFile.overview),
         turns,
       );
-      setThreads((p) => ({
-        ...p,
-        [suspect.id]: [...(p[suspect.id] ?? []), { id: `${Date.now()}-a`, role: "suspect", text: reply }],
-      }));
-      addLog(`Interrogation · ${suspect.name}`, `Q: ${question}\nA: ${reply}`);
+      const answer: ChatMessage = {
+        id: `${Date.now()}-a-${Math.random().toString(36).slice(2, 7)}`,
+        role: "suspect",
+        text: reply,
+        author: suspect.name,
+      };
+      setThreads((p) => ({ ...p, [suspect.id]: [...(p[suspect.id] ?? []), answer] }));
+      publish({ type: "chat", suspectId: suspect.id, message: answer });
+      addLog(`Interrogation · ${suspect.name}`, `[${mine.author}] Q: ${question}\nA: ${reply}`);
       void saveInterrogation({
         caseTitle: caseFile.title,
         suspectName: suspect.name,
         question,
         answer: reply,
+        roomCode: roomId,
+        alias: mine.author ?? "Detective",
       }).catch((e) => toast.error(`Database log failed: ${e.message}`));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Interrogation failed.");
@@ -147,7 +174,7 @@ export function InterrogationTerminal() {
               className={m.role === "investigator" ? "text-right" : "text-left"}
             >
               <div className="label-caps">
-                {m.role === "investigator" ? "Club Investigator" : suspect.name}
+                {m.role === "investigator" ? `[${m.author ?? "Detective"}]` : suspect.name}
               </div>
               <p
                 className={`mt-1 inline-block max-w-3xl rounded-md px-5 py-3 text-2xl leading-snug ${

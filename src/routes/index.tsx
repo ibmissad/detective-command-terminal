@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CaseProvider } from "@/lib/case-store";
+import { RoomProvider } from "@/lib/room";
+import { RoomGate } from "@/components/RoomGate";
 import { CommandHeader } from "@/components/CommandHeader";
 import { CaseBriefing } from "@/components/CaseBriefing";
 import { InterrogationTerminal } from "@/components/InterrogationTerminal";
@@ -38,7 +40,9 @@ const TABS = [
 
 function Index() {
   return (
-    <CaseProvider>
+    <RoomProvider>
+      <CaseProvider>
+      <RoomGate />
       <div className="min-h-screen">
         <CommandHeader />
         <main className="mx-auto max-w-[110rem] px-6 py-8">
@@ -71,6 +75,7 @@ function Index() {
           </Tabs>
         </main>
       </div>
-    </CaseProvider>
+      </CaseProvider>
+    </RoomProvider>
   );
 }

@@ -52,6 +52,7 @@ export type ChatMessage = {
   id: string;
   role: "investigator" | "suspect";
   text: string;
+  author?: string;
 };
 
 export type Verdict = {

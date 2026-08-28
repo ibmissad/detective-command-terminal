@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { saveCase } from "@/lib/db";
+import { useRoom } from "@/lib/room";
+import { RoomInvite } from "./RoomInvite";
 import { EyeOff, Eye, RotateCcw, Wand2 } from "lucide-react";
 
 const GEN_PROMPT = `You are the Game Master engine for a live detective club. Given a case concept, invent a complete, internally consistent mystery.
@@ -28,6 +30,7 @@ The solution must be deducible from the hotspots and clues alone. No supernatura
 
 export function GameMasterConsole() {
   const { caseFile, setCaseFile, apiKey, resetSession } = useCase();
+  const { roomId } = useRoom();
   const [concept, setConcept] = useState("");
   const [busy, setBusy] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -56,7 +59,7 @@ export function GameMasterConsole() {
       setCaseFile(parsed);
       resetSession();
       toast.success(`Case loaded: ${parsed.title}`);
-      void saveCase(parsed)
+      void saveCase(parsed, roomId)
         .then((r) => r && toast.success("Case archived to your database."))
         .catch((e) => toast.error(`Database save failed: ${e.message}`));
     } catch (err) {
@@ -68,6 +71,7 @@ export function GameMasterConsole() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-2">
+      <RoomInvite />
       <section className="panel rounded-md p-6">
         <div className="flex items-center justify-between">
           <span className="label-caps">Game Master · Case Forge</span>
@@ -112,7 +116,7 @@ export function GameMasterConsole() {
             variant="outline"
             size="lg"
             onClick={() => {
-              void saveCase(caseFile)
+              void saveCase(caseFile, roomId)
                 .then((r) =>
                   r
                     ? toast.success("Current case archived.")
