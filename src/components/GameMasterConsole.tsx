@@ -46,6 +46,7 @@ export function GameMasterConsole() {
   const [concept, setConcept] = useState("");
   const [busy, setBusy] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
 
   const generate = async () => {
     if (!concept.trim()) {
@@ -60,7 +61,7 @@ export function GameMasterConsole() {
     try {
       const raw = await callGemini(
         apiKey,
-        GEN_PROMPT,
+        GEN_PROMPT(difficulty),
         [{ role: "user", text: `Case concept: ${concept.trim()}` }],
         true,
       );
