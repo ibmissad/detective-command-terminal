@@ -36,6 +36,7 @@ export function getDb(): SupabaseClient | null {
 export const SCHEMA_SQL = `create table if not exists public.cases (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
+  room_code text,
   title text not null,
   briefing text not null,
   police_report text,
@@ -48,6 +49,8 @@ export const SCHEMA_SQL = `create table if not exists public.cases (
 create table if not exists public.interrogation_logs (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
+  room_code text,
+  detective_alias text,
   case_title text not null,
   suspect_name text not null,
   question text not null,
@@ -57,6 +60,7 @@ create table if not exists public.interrogation_logs (
 create table if not exists public.verdicts (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
+  room_code text,
   case_title text not null,
   culprit text not null,
   motive text,
@@ -76,12 +80,18 @@ create policy "club write cases" on public.cases for insert to anon, authenticat
 create policy "club read logs" on public.interrogation_logs for select to anon, authenticated using (true);
 create policy "club write logs" on public.interrogation_logs for insert to anon, authenticated with check (true);
 create policy "club read verdicts" on public.verdicts for select to anon, authenticated using (true);
-create policy "club write verdicts" on public.verdicts for insert to anon, authenticated with check (true);`;
+create policy "club write verdicts" on public.verdicts for insert to anon, authenticated with check (true);
 
-export async function saveCase(c: CaseFile) {
+-- Realtime streams for live multi-device sync
+alter publication supabase_realtime add table public.cases;
+alter publication supabase_realtime add table public.interrogation_logs;
+alter publication supabase_realtime add table public.verdicts;`;
+
+export async function saveCase(c: CaseFile, roomCode = "") {
   const db = getDb();
   if (!db) return null;
   const { error } = await db.from("cases").insert({
+    room_code: roomCode || null,
     title: c.title,
     briefing: c.overview,
     police_report: c.policeReport,
@@ -99,10 +109,14 @@ export async function saveInterrogation(input: {
   suspectName: string;
   question: string;
   answer: string;
+  roomCode?: string;
+  alias?: string;
 }) {
   const db = getDb();
   if (!db) return null;
   const { error } = await db.from("interrogation_logs").insert({
+    room_code: input.roomCode || null,
+    detective_alias: input.alias || null,
     case_title: input.caseTitle,
     suspect_name: input.suspectName,
     question: input.question,
@@ -112,10 +126,11 @@ export async function saveInterrogation(input: {
   return true;
 }
 
-export async function saveVerdict(input: Verdict & { caseTitle: string; cracked: boolean }) {
+export async function saveVerdict(input: Verdict & { caseTitle: string; cracked: boolean; roomCode?: string }) {
   const db = getDb();
   if (!db) return null;
   const { error } = await db.from("verdicts").insert({
+    room_code: input.roomCode || null,
     case_title: input.caseTitle,
     culprit: input.culprit,
     motive: input.motive,
