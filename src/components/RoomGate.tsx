@@ -84,8 +84,14 @@ export function RoomGate() {
               size="lg"
               className="w-full"
               onClick={() => {
-                if (hostCode.length !== 4) return toast.error("Use a 4-digit access code.");
-                if (!hostAlias.trim()) return toast.error("Enter a host alias.");
+                if (hostCode.length !== 4) {
+                  toast.error("Use a 4-digit access code.");
+                  return;
+                }
+                if (!hostAlias.trim()) {
+                  toast.error("Enter a host alias.");
+                  return;
+                }
                 hostRoom(hostCode, hostAlias);
               }}
             >
@@ -117,8 +123,14 @@ export function RoomGate() {
               size="lg"
               className="w-full"
               onClick={() => {
-                if (joinCode.length !== 4) return toast.error("Enter the 4-digit room ID.");
-                if (!joinAlias.trim()) return toast.error("Enter your detective alias.");
+                if (joinCode.length !== 4) {
+                  toast.error("Enter the 4-digit room ID.");
+                  return;
+                }
+                if (!joinAlias.trim()) {
+                  toast.error("Enter your detective alias.");
+                  return;
+                }
                 joinRoom(joinCode, joinAlias);
               }}
             >

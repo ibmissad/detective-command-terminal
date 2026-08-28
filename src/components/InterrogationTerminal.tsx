@@ -76,9 +76,6 @@ export function InterrogationTerminal() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, busy]);
 
-  const suspectSelectId = suspectId;
-  void suspectSelectId;
-
   const send = async () => {
     const question = input.trim();
     if (!question || !suspect || busy) return;
@@ -123,7 +120,7 @@ export function InterrogationTerminal() {
         question,
         answer: reply,
         roomCode: roomId,
-        alias: mine.author,
+        alias: mine.author ?? "Detective",
       }).catch((e) => toast.error(`Database log failed: ${e.message}`));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Interrogation failed.");
