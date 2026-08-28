@@ -4,11 +4,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { CaseFile, LogEntry, Verdict } from "./case-types";
 import { DEFAULT_CASE } from "./default-case";
+import { useRoom } from "./room";
+
 
 const KEY_CASE = "scc.case";
 const KEY_LOG = "scc.log";
