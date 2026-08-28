@@ -7,13 +7,25 @@ import { ApiKeyDialog } from "./ApiKeyDialog";
 import { DatabaseConfigDialog } from "./DatabaseConfigDialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { saveCase } from "@/lib/db";
 import { useRoom } from "@/lib/room";
 import { RoomInvite } from "./RoomInvite";
 import { EyeOff, Eye, RotateCcw, Wand2 } from "lucide-react";
 
-const GEN_PROMPT = `You are the Game Master engine for a live detective club. Given a case concept, invent a complete, internally consistent mystery.
+export type Difficulty = "easy" | "medium" | "hard";
+
+const DIFFICULTY_RULES: Record<Difficulty, string> = {
+  easy: `DIFFICULTY: EASY. Provide direct, clear clues and keep the suspect pool small (2-3 suspects max). Suspects should have straightforward, obvious motives and alibis that are easily spotted as false or shaky. Limit red herrings to zero. Keep every evidence log entry explicit and unmistakable. The correct culprit should be reachable with minimal deduction.`,
+  medium: `DIFFICULTY: MEDIUM. A balanced mystery with 3-4 suspects. Include exactly one subtle red herring that is plausible but ultimately irrelevant. Motives and alibis should require some thought but be fairly deducible. Clues point clearly but not obviously at the culprit.`,
+  hard: `DIFFICULTY: HARD. A complex mystery with 4 suspects, multiple red herrings (2-3), hidden clues that must be inferred, and tight, nearly airtight alibis. Motives are layered and intertwined. The chain of deduction is long and demands careful cross-referencing of hotspots, clues, and alibis.`,
+};
+
+const GEN_PROMPT = (difficulty: Difficulty) => `You are the Game Master engine for a live detective club. Given a case concept, invent a complete, internally consistent mystery.
+
+${DIFFICULTY_RULES[difficulty]}
 
 Return ONLY JSON matching this shape:
 {
