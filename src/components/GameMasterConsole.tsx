@@ -99,6 +99,21 @@ export function GameMasterConsole() {
           suspect profiles with hidden motives and alibis, physical clues, six scene hotspots, and
           the exact true solution.
         </p>
+        <div className="mt-4 grid gap-2">
+          <Label htmlFor="difficulty" className="label-caps text-muted-foreground">
+            Case difficulty
+          </Label>
+          <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
+            <SelectTrigger id="difficulty" className="w-full border-border bg-surface-2 text-lg sm:w-64">
+              <SelectValue placeholder="Select difficulty" />
+            </SelectTrigger>
+            <SelectContent className="bg-surface-2 border-border">
+              <SelectItem value="easy" className="text-base">Easy</SelectItem>
+              <SelectItem value="medium" className="text-base">Medium</SelectItem>
+              <SelectItem value="hard" className="text-base">Hard</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Textarea
           value={concept}
           onChange={(e) => setConcept(e.target.value)}
