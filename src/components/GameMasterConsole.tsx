@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import { saveCase } from "@/lib/db";
 import { useRoom } from "@/lib/room";
 import { RoomInvite } from "./RoomInvite";
+import { AdminUsers } from "./AdminUsers";
+import { SessionManager } from "./SessionManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EyeOff, Eye, RotateCcw, Wand2 } from "lucide-react";
 
 export type Difficulty = "easy" | "medium" | "hard";
@@ -83,7 +86,22 @@ export function GameMasterConsole() {
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
+    <Tabs defaultValue="forge" className="space-y-6">
+      <TabsList className="w-full justify-start">
+        <TabsTrigger value="forge">Case Forge</TabsTrigger>
+        <TabsTrigger value="users">Admin · Users</TabsTrigger>
+        <TabsTrigger value="sessions">Save / Resume</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="users">
+        <AdminUsers />
+      </TabsContent>
+
+      <TabsContent value="sessions">
+        <SessionManager />
+      </TabsContent>
+
+      <TabsContent value="forge" className="grid gap-6 xl:grid-cols-2">
       <RoomInvite />
       <section className="panel rounded-md p-6">
         <div className="flex items-center justify-between">
@@ -192,7 +210,8 @@ export function GameMasterConsole() {
           </div>
         )}
       </section>
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 }
 
