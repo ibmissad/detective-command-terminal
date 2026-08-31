@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { getDb } from "./db";
+import { isHostUnlocked } from "./host-gate";
 import type { CaseFile, ChatMessage, LogEntry, Verdict } from "./case-types";
 
 const KEY_ROOM = "scc.room";
@@ -31,6 +32,8 @@ type RoomCtx = {
   roomId: string;
   alias: string;
   isHost: boolean;
+  hostUnlocked: boolean;
+  setHostUnlocked: (v: boolean) => void;
   joined: boolean;
   online: boolean;
   members: Member[];
@@ -51,6 +54,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
   const [roomId, setRoomId] = useState("");
   const [alias, setAlias] = useState("");
   const [isHost, setIsHost] = useState(false);
+  const [hostUnlocked, setHostUnlocked] = useState(false);
   const [online, setOnline] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const handlers = useRef(new Set<(e: RoomEvent) => void>());
@@ -62,6 +66,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     setRoomId(urlRoom || window.localStorage.getItem(KEY_ROOM) || "");
     setAlias(window.localStorage.getItem(KEY_ALIAS) || "");
     setIsHost(window.localStorage.getItem(KEY_HOST) === "1" && !urlRoom);
+    setHostUnlocked(isHostUnlocked());
   }, []);
 
   const dispatch = useCallback((event: RoomEvent) => {
@@ -137,6 +142,8 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       roomId,
       alias,
       isHost,
+      hostUnlocked,
+      setHostUnlocked,
       joined: Boolean(roomId && alias),
       online,
       members,
@@ -154,7 +161,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
         return () => handlers.current.delete(handler);
       },
     }),
-    [roomId, alias, isHost, online, members, enter, publish],
+    [roomId, alias, isHost, hostUnlocked, online, members, enter, publish],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

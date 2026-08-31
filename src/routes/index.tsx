@@ -8,6 +8,9 @@ import { CaseBriefing } from "@/components/CaseBriefing";
 import { InterrogationTerminal } from "@/components/InterrogationTerminal";
 import { GameMasterConsole } from "@/components/GameMasterConsole";
 import { VerdictConsole } from "@/components/VerdictConsole";
+import { CaseArchives } from "@/components/CaseArchives";
+import { PresenceBar } from "@/components/PresenceBar";
+import { HostGate } from "@/components/HostGate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +38,7 @@ const TABS = [
   { value: "briefing", label: "Case Briefing" },
   { value: "interrogation", label: "Interrogation" },
   { value: "verdict", label: "Verdict" },
+  { value: "archives", label: "Case Archives" },
   { value: "gm", label: "Game Master" },
 ];
 
@@ -46,7 +50,8 @@ function Index() {
       <div className="min-h-screen">
         <CommandHeader />
         <main className="mx-auto max-w-[110rem] px-6 py-8">
-          <Tabs defaultValue="briefing">
+          <PresenceBar />
+          <Tabs defaultValue="briefing" className="mt-6">
             <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0">
               {TABS.map((t) => (
                 <TabsTrigger
@@ -68,8 +73,13 @@ function Index() {
               <TabsContent value="verdict">
                 <VerdictConsole />
               </TabsContent>
+              <TabsContent value="archives">
+                <CaseArchives />
+              </TabsContent>
               <TabsContent value="gm">
-                <GameMasterConsole />
+                <HostGate>
+                  <GameMasterConsole />
+                </HostGate>
               </TabsContent>
             </div>
           </Tabs>

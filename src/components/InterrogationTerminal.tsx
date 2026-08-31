@@ -53,6 +53,25 @@ export function InterrogationTerminal() {
   );
   const messages = threads[suspect?.id ?? ""] ?? [];
 
+  // Persist threads so a refresh — or a resumed session — keeps the transcript.
+  useEffect(() => {
+    const load = () => {
+      try {
+        const raw = window.localStorage.getItem("scc.threads");
+        setThreads(raw ? (JSON.parse(raw) as Record<string, ChatMessage[]>) : {});
+      } catch {
+        setThreads({});
+      }
+    };
+    load();
+    window.addEventListener("scc-threads", load);
+    return () => window.removeEventListener("scc-threads", load);
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(threads).length) window.localStorage.setItem("scc.threads", JSON.stringify(threads));
+  }, [threads]);
+
   useEffect(() => {
     if (!caseFile.suspects.some((s) => s.id === suspectId)) {
       setSuspectId(caseFile.suspects[0]?.id ?? "");

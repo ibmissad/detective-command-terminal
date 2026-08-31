@@ -1,12 +1,25 @@
 import { useState } from "react";
 import { useCase } from "@/lib/case-store";
 import { CaseLog } from "./CaseLog";
+import { HotspotPuzzle } from "./HotspotPuzzle";
+import { cueFor, sceneTheme, type CueKind } from "@/lib/puzzles";
 import sceneMain from "@/assets/scene-main.jpg";
 import evidence1 from "@/assets/evidence-1.jpg";
 import evidence2 from "@/assets/evidence-2.jpg";
 import evidence3 from "@/assets/evidence-3.jpg";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, Lock, Unlock } from "lucide-react";
+import {
+  FileText,
+  Droplet,
+  ScrollText,
+  TerminalSquare,
+  Swords,
+  Fingerprint,
+  Clock,
+  KeySquare,
+  Search,
+  Lock,
+} from "lucide-react";
 
 const GALLERY = [
   { src: evidence1, title: "Exhibit A — Case glass fragment", note: "Latent print, unmatched." },
@@ -14,21 +27,54 @@ const GALLERY = [
   { src: evidence3, title: "Exhibit C — Impression cast", note: "Garden path, east side." },
 ];
 
+const CUE_ICON: Record<CueKind, typeof Droplet> = {
+  blood: Droplet,
+  note: ScrollText,
+  terminal: TerminalSquare,
+  weapon: Swords,
+  print: Fingerprint,
+  time: Clock,
+  key: KeySquare,
+  trace: Search,
+};
+
+const CUE_LABEL: Record<CueKind, string> = {
+  blood: "Blood trace",
+  note: "Document",
+  terminal: "Encrypted device",
+  weapon: "Weapon trace",
+  print: "Latent print",
+  time: "Timestamp",
+  key: "Lock & key",
+  trace: "Trace evidence",
+};
+
 export function CaseBriefing() {
   const { caseFile, unlocked, unlock, addLog } = useCase();
   const [active, setActive] = useState<string | null>(null);
+  const [puzzleFor_, setPuzzleFor] = useState<{ id: string; index: number } | null>(null);
   const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
 
   const activeSpot = caseFile.hotspots.find((h) => h.id === active) ?? null;
+  const theme = sceneTheme(caseFile);
+  const puzzleSpot = caseFile.hotspots.find((h) => h.id === puzzleFor_?.id) ?? null;
 
-  const openSpot = (id: string) => {
+  const openSpot = (id: string, index: number) => {
     const spot = caseFile.hotspots.find((h) => h.id === id);
     if (!spot) return;
-    setActive(id);
-    if (!unlocked.includes(id)) {
-      unlock(id);
-      addLog(`Hotspot · ${spot.label}`, spot.detail);
+    if (unlocked.includes(id)) {
+      setActive(id);
+      return;
     }
+    setPuzzleFor({ id, index });
+  };
+
+  const solveSpot = () => {
+    const spot = puzzleSpot;
+    if (!spot) return;
+    setActive(spot.id);
+    unlock(spot.id);
+    addLog(`Hotspot · ${spot.label}`, spot.detail);
   };
 
   return (
@@ -42,35 +88,49 @@ export function CaseBriefing() {
         </section>
 
         <section className="panel overflow-hidden rounded-md">
-          <div className="flex items-center justify-between border-b border-border px-5 py-3">
-            <span className="label-caps">Scene Survey — {unlocked.length}/{caseFile.hotspots.length} points examined</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
+            <div>
+              <span className="label-caps">
+                {theme.name} — {unlocked.length}/{caseFile.hotspots.length} points examined
+              </span>
+              <p className="font-mono text-[0.7rem] uppercase tracking-widest text-muted-foreground">
+                {theme.tagline}
+              </p>
+            </div>
             <span className="font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-              Click a marker
+              Solve the mini-puzzle to unlock a lead
             </span>
           </div>
-          <div className="relative">
+          <div className={`relative ${theme.frame}`}>
             <img
               src={sceneMain}
-              alt="Crime scene overview of the study at Blackwood House"
+              alt={`${theme.name} of the scene: ${caseFile.title}`}
               width={1536}
               height={1024}
               className="w-full"
             />
-            {caseFile.hotspots.map((h) => {
+            <div className={`pointer-events-none absolute inset-0 ${theme.overlay}`} />
+            {caseFile.hotspots.map((h, i) => {
               const found = unlocked.includes(h.id);
+              const cue = cueFor(h);
+              const Icon = found ? CUE_ICON[cue] : Lock;
               return (
                 <button
                   key={h.id}
-                  onClick={() => openSpot(h.id)}
-                  aria-label={`Examine ${h.label}`}
+                  onClick={() => openSpot(h.id, i)}
+                  aria-label={`${found ? "Review" : "Investigate"} ${h.label} — ${CUE_LABEL[cue]}`}
+                  title={found ? h.label : `${CUE_LABEL[cue]} · locked`}
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-2 backdrop-blur-sm transition-transform hover:scale-125 ${
+                  className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border-2 px-3 py-2 backdrop-blur-sm transition-transform hover:scale-110 ${
                     found
                       ? "border-gold bg-gold/25 text-gold"
-                      : "hotspot-pulse border-gold bg-background/70 text-gold"
+                      : "hotspot-pulse border-gold bg-background/75 text-gold"
                   }`}
                 >
-                  {found ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden font-mono text-[0.65rem] uppercase tracking-widest sm:inline">
+                    {found ? h.label.slice(0, 18) : CUE_LABEL[cue]}
+                  </span>
                 </button>
               );
             })}
@@ -82,6 +142,15 @@ export function CaseBriefing() {
             </div>
           )}
         </section>
+
+        <HotspotPuzzle
+          spot={puzzleSpot}
+          index={puzzleFor_?.index ?? 0}
+          open={Boolean(puzzleSpot)}
+          onOpenChange={(o) => !o && setPuzzleFor(null)}
+          onSolved={solveSpot}
+        />
+
 
         <section className="panel rounded-md p-6">
           <div className="flex items-center gap-2">

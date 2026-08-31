@@ -35,6 +35,7 @@ type Ctx = {
   verdict: Verdict | null;
   setVerdict: (v: Verdict | null) => void;
   resetSession: () => void;
+  loadState: (s: { caseFile: CaseFile; log: LogEntry[]; unlocked: string[]; verdict: Verdict | null }) => void;
 };
 
 const CaseContext = createContext<Ctx | null>(null);
@@ -184,6 +185,18 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setVerdictState(v);
         persist(KEY_VERDICT, v);
         publish({ type: "verdict", verdict: v });
+      },
+      loadState: (s) => {
+        setCaseFileState(s.caseFile);
+        setLog(s.log);
+        setUnlocked(s.unlocked);
+        setVerdictState(s.verdict);
+        persist(KEY_CASE, s.caseFile);
+        persist(KEY_LOG, s.log);
+        persist(KEY_UNLOCKED, s.unlocked);
+        persist(KEY_VERDICT, s.verdict);
+        publish({ type: "sync-state", caseFile: s.caseFile, log: s.log, unlocked: s.unlocked });
+        publish({ type: "case", caseFile: s.caseFile });
       },
       resetSession: () => {
         setLog([]);
