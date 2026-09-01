@@ -49,21 +49,23 @@ function Index() {
       <RoomGate />
       <div className="min-h-screen">
         <CommandHeader />
-        <main className="mx-auto max-w-[110rem] px-6 py-8">
+        <main className="mx-auto max-w-[110rem] px-3 py-5 sm:px-6 sm:py-8">
           <PresenceBar />
-          <Tabs defaultValue="briefing" className="mt-6">
-            <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0">
-              {TABS.map((t) => (
-                <TabsTrigger
-                  key={t.value}
-                  value={t.value}
-                  className="rounded-none border-b-2 border-transparent px-6 py-3 font-mono text-sm uppercase tracking-[0.18em] text-muted-foreground data-[state=active]:border-gold data-[state=active]:bg-transparent data-[state=active]:text-gold data-[state=active]:shadow-none"
-                >
-                  {t.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <div className="mt-8">
+          <Tabs defaultValue="briefing" className="mt-4 sm:mt-6">
+            <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
+              <TabsList className="h-auto w-max min-w-full justify-start gap-1 bg-transparent p-0 sm:gap-2">
+                {TABS.map((t) => (
+                  <TabsTrigger
+                    key={t.value}
+                    value={t.value}
+                    className="min-h-11 shrink-0 rounded-none border-b-2 border-transparent px-3 py-3 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground data-[state=active]:border-gold data-[state=active]:bg-transparent data-[state=active]:text-gold data-[state=active]:shadow-none sm:px-6 sm:text-sm sm:tracking-[0.18em]"
+                  >
+                    {t.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            <div className="mt-5 sm:mt-8">
               <TabsContent value="briefing">
                 <CaseBriefing />
               </TabsContent>
