@@ -8,8 +8,19 @@ export function RoomInvite() {
   const { roomId, members, online } = useRoom();
   const [origin, setOrigin] = useState("");
 
-  useEffect(() => setOrigin(window.location.origin), []);
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
   const link = origin ? `${origin}/?room=${roomId}` : "";
+
+  const handleCopy = () => {
+    if (!link) return;
+    navigator.clipboard
+      .writeText(link)
+      .then(() => toast.success("Join link copied."))
+      .catch(() => toast.error("Failed to copy link."));
+  };
 
   return (
     <section className="panel rounded-md p-6">
@@ -19,17 +30,15 @@ export function RoomInvite() {
           <span className="label-caps">Access code</span>
           <p className="font-mono text-5xl tracking-[0.3em] text-gold">{roomId || "----"}</p>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <span className="label-caps">Members join at</span>
           <p className="truncate font-mono text-lg text-foreground/85">{link || "—"}</p>
         </div>
         <Button
           variant="outline"
           className="border-gold-dim text-gold"
-          onClick={() => {
-            void navigator.clipboard.writeText(link);
-            toast.success("Join link copied.");
-          }}
+          onClick={handleCopy}
+          disabled={!link}
         >
           <Link2 className="mr-2 h-4 w-4" /> Copy join link
         </Button>
