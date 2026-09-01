@@ -61,7 +61,13 @@ export function HotspotPuzzle({
         </DialogHeader>
 
         {puzzle.kind === "cipher" && (
-          <div className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(guess);
+            }}
+            className="space-y-4"
+          >
             <div className="rounded border border-gold-dim bg-surface-2 p-5 text-center">
               <p className="label-caps">Encrypted tag · Caesar shift +{puzzle.shift}</p>
               <p className="mt-2 font-mono text-4xl tracking-[0.3em] text-gold">{puzzle.scrambled}</p>
@@ -69,14 +75,13 @@ export function HotspotPuzzle({
             <Input
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submit(guess)}
               placeholder="Decoded word"
               className="h-12 border-border bg-surface-2 text-center font-mono text-xl uppercase tracking-widest"
             />
-            <Button className="w-full" size="lg" onClick={() => submit(guess)}>
+            <Button type="submit" className="w-full" size="lg">
               Decrypt
             </Button>
-          </div>
+          </form>
         )}
 
         {puzzle.kind === "fingerprint" && (
