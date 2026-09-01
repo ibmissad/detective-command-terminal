@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useCase } from "@/lib/case-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,14 +14,14 @@ function matches(guess: string, truth: string) {
   const g = norm(guess);
   const t = norm(truth);
   if (!g || !t) return false;
-  
+
   // Direct inclusion match
   if (t.includes(g) || g.includes(t)) return true;
 
   // Single word keyword match (e.g., "business" matching "business embezzlement")
   const gWords = g.split(/\s+/).filter((w) => w.length >= 3);
   const tWords = t.split(/\s+/).filter((w) => w.length >= 3);
-  
+
   const hasKeywordHit = gWords.some((gw) => tWords.some((tw) => tw.includes(gw) || gw.includes(tw)));
   if (hasKeywordHit) return true;
 
@@ -30,10 +30,12 @@ function matches(guess: string, truth: string) {
   return tWords.length > 0 && hits / tWords.length >= 0.3;
 }
 
+const INITIAL_FORM = { culprit: "", motive: "", weapon: "", keyEvidence: "" };
+
 export function VerdictConsole() {
   const { caseFile, verdict, setVerdict, addLog } = useCase();
   const { roomId } = useRoom();
-  const [form, setForm] = useState({ culprit: "", motive: "", weapon: "", keyEvidence: "" });
+  const [form, setForm] = useState(INITIAL_FORM);
 
   const sol = caseFile.solution;
   const results = verdict
@@ -48,24 +50,30 @@ export function VerdictConsole() {
   // Case is CRACKED as long as the culprit is correct
   const cracked = results ? results.culprit : false;
 
-  const submit = () => {
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
     if (!form.culprit.trim()) {
       toast.error("Name a culprit before submitting.");
       return;
     }
     setVerdict(form);
-    
+
     // Cracked if culprit is matched
     const wasCracked = matches(form.culprit, sol.culprit);
 
     void saveVerdict({ ...form, caseTitle: caseFile.title, cracked: wasCracked, roomCode: roomId })
       .then((r) => r && toast.success("Verdict archived to your database."))
-      .catch((e) => toast.error(`Database save failed: ${e.message}`));
+      .catch((err: Error) => toast.error(`Database save failed: ${err.message}`));
 
     addLog(
       "Verdict filed",
       `Culprit: ${form.culprit} · Motive: ${form.motive} · Weapon: ${form.weapon} · Evidence: ${form.keyEvidence}`,
     );
+  };
+
+  const handleReset = () => {
+    setVerdict(null);
+    setForm(INITIAL_FORM);
   };
 
   if (verdict && results) {
@@ -122,7 +130,7 @@ export function VerdictConsole() {
           </section>
         </div>
 
-        <Button variant="outline" size="lg" onClick={() => setVerdict(null)}>
+        <Button variant="outline" size="lg" onClick={handleReset}>
           File a new verdict
         </Button>
       </div>
@@ -137,53 +145,59 @@ export function VerdictConsole() {
       </div>
       <h2 className="mt-2 text-3xl text-gold">{caseFile.title}</h2>
       <div className="gold-rule my-5" />
-      <div className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <Field
+          id="culprit"
           label="Culprit"
           value={form.culprit}
-          onChange={(v) => setForm({ ...form, culprit: v })}
+          onChange={(v) => setForm((p) => ({ ...p, culprit: v }))}
           placeholder="Who did it?"
         />
         <Field
+          id="weapon"
           label="Weapon / Method"
           value={form.weapon}
-          onChange={(v) => setForm({ ...form, weapon: v })}
+          onChange={(v) => setForm((p) => ({ ...p, weapon: v }))}
           placeholder="How was it done?"
         />
         <div>
-          <label className="label-caps">Motive</label>
+          <label htmlFor="motive" className="label-caps">Motive</label>
           <Textarea
+            id="motive"
             rows={3}
             value={form.motive}
-            onChange={(e) => setForm({ ...form, motive: e.target.value })}
+            onChange={(e) => setForm((p) => ({ ...p, motive: e.target.value }))}
             placeholder="Why did they do it?"
             className="mt-2 border-border bg-surface-2 text-lg"
           />
         </div>
         <div>
-          <label className="label-caps">Key Evidence</label>
+          <label htmlFor="keyEvidence" className="label-caps">Key Evidence</label>
           <Textarea
+            id="keyEvidence"
             rows={3}
             value={form.keyEvidence}
-            onChange={(e) => setForm({ ...form, keyEvidence: e.target.value })}
+            onChange={(e) => setForm((p) => ({ ...p, keyEvidence: e.target.value }))}
             placeholder="What proves it?"
             className="mt-2 border-border bg-surface-2 text-lg"
           />
         </div>
-        <Button onClick={submit} size="lg" className="w-full text-lg">
+        <Button type="submit" size="lg" className="w-full text-lg">
           Submit final verdict
         </Button>
-      </div>
+      </form>
     </section>
   );
 }
 
 function Field({
+  id,
   label,
   value,
   onChange,
   placeholder,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -191,8 +205,9 @@ function Field({
 }) {
   return (
     <div>
-      <label className="label-caps">{label}</label>
+      <label htmlFor={id} className="label-caps">{label}</label>
       <Input
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
