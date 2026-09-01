@@ -17,6 +17,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Ensure this only runs on the client side
+    if (typeof window === "undefined") return;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -33,6 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = () => supabase.auth.signOut();
+
+  // During SSR or initial load, avoid flashing the login screen incorrectly
+  if (typeof window === "undefined") {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
