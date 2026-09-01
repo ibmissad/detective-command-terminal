@@ -10,17 +10,17 @@ export function PresenceBar() {
       <span className="label-caps flex items-center gap-2">
         <Users className="h-4 w-4 text-gold" /> Live detectives online
       </span>
-      <span className="font-mono text-sm text-muted-foreground">
+      <span className="flex items-center gap-1.5 font-mono text-sm text-muted-foreground">
+        <span className={`h-2 w-2 rounded-full ${online ? "bg-success" : "bg-destructive"}`} />
         {online ? "sync live" : "offline"}
       </span>
       <div className="flex flex-wrap gap-2">
         {list.map((m, i) => (
           <span
             key={`${m.alias}-${i}`}
-            className="flex items-center gap-1 rounded-full border border-gold-dim bg-surface-2 px-3 py-1 font-mono text-sm text-foreground/90"
+            className="flex items-center gap-1.5 rounded-full border border-gold-dim bg-surface-2 px-3 py-1 font-mono text-sm text-foreground/90"
           >
-            <span className="h-2 w-2 rounded-full bg-success" />
-            {m.host && <Crown className="h-3 w-3 text-gold" />}
+            {m.host && <Crown className="h-3.5 w-3.5 text-gold" />}
             {m.alias}
           </span>
         ))}
