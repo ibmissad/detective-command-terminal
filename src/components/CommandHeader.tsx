@@ -2,6 +2,8 @@ import { formatClock, useCase } from "@/lib/case-store";
 import { Button } from "@/components/ui/button";
 import { Timer, Fingerprint, Radio, Users } from "lucide-react";
 import { useRoom } from "@/lib/room";
+import { ApiKeyDialog } from "@/components/ApiKeyDialog";
+import { DatabaseConfigDialog } from "@/components/DatabaseConfigDialog";
 
 export function CommandHeader() {
   const { caseFile, elapsed, resetTimer, unlocked } = useCase();
@@ -46,11 +48,13 @@ export function CommandHeader() {
               {formatClock(elapsed)}
             </span>
           </div>
-          <div className="ml-auto flex items-center gap-1 lg:ml-0">
-            <Button variant="ghost" size="sm" className="min-h-11" onClick={resetTimer}>
+          <div className="ml-auto flex flex-wrap items-center gap-2 lg:ml-0">
+            <ApiKeyDialog />
+            <DatabaseConfigDialog />
+            <Button variant="ghost" size="sm" className="min-h-9" onClick={resetTimer}>
               Reset timer
             </Button>
-            <Button variant="ghost" size="sm" className="min-h-11" onClick={leaveRoom}>
+            <Button variant="ghost" size="sm" className="min-h-9" onClick={leaveRoom}>
               Leave
             </Button>
           </div>
