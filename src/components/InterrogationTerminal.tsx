@@ -3,8 +3,6 @@ import { useCase } from "@/lib/case-store";
 import { useRoom } from "@/lib/room";
 import { callGemini, type GeminiTurn } from "@/lib/gemini";
 import type { ChatMessage, Suspect } from "@/lib/case-types";
-import { ApiKeyDialog } from "./ApiKeyDialog";
-import { DatabaseConfigDialog } from "./DatabaseConfigDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +44,9 @@ export function InterrogationTerminal() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  // Fallback to environment variable if state key isn't explicitly set
+  const effectiveApiKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY || "";
 
   const suspect = useMemo(
     () => caseFile.suspects.find((s) => s.id === suspectId) ?? caseFile.suspects[0],
@@ -98,8 +99,8 @@ export function InterrogationTerminal() {
   const send = async () => {
     const question = input.trim();
     if (!question || !suspect || busy) return;
-    if (!apiKey) {
-      toast.error("Add your Gemini API key in Terminal Settings first.");
+    if (!effectiveApiKey) {
+      toast.error("Gemini API key is missing. Add your API key in the top header.");
       return;
     }
 
@@ -120,7 +121,7 @@ export function InterrogationTerminal() {
         text: m.text,
       }));
       const reply = await callGemini(
-        apiKey,
+        effectiveApiKey,
         systemFor(suspect, caseFile.title, caseFile.overview),
         turns,
       );
@@ -170,17 +171,15 @@ export function InterrogationTerminal() {
             </SelectContent>
           </Select>
           <span className="label-caps hidden sm:inline">Live channel open</span>
-          <div className="ml-auto flex flex-wrap items-center gap-1 sm:gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               className="min-h-11"
               onClick={() => setThreads((p) => ({ ...p, [suspect.id]: [] }))}
             >
-              <Trash2 className="mr-1 h-4 w-4" /> Clear
+              <Trash2 className="mr-1 h-4 w-4" /> Clear Transcript
             </Button>
-            <ApiKeyDialog />
-            <DatabaseConfigDialog />
           </div>
         </div>
 
