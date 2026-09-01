@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Radio } from "lucide-react";
 
 export function RoomGate() {
-  const { joined, hostRoom, joinRoom } = useRoom();
+  const { joined, hostRoom, joinRoom, online } = useRoom();
   const [hostCode, setHostCode] = useState(() => makeRoomCode());
   const [hostAlias, setHostAlias] = useState("Game Master");
   const [joinCode, setJoinCode] = useState(() =>
@@ -72,6 +72,16 @@ export function RoomGate() {
             </div>
           </div>
         )}
+
+        <div className="flex items-center justify-between rounded border border-border bg-surface-2 px-4 py-2 text-sm font-mono">
+          <span className="flex items-center gap-2">
+            <span className={`h-2.5 w-2.5 rounded-full ${online ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`} />
+            <span className="text-muted-foreground uppercase tracking-wider text-xs">Connection Status</span>
+          </span>
+          <span className={online ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold"}>
+            {online ? "online" : "offline"}
+          </span>
+        </div>
 
         <Tabs defaultValue={joinCode ? "join" : "host"}>
           <TabsList className="w-full">
