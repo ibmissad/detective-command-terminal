@@ -8,16 +8,26 @@ import { toast } from "sonner";
 import { saveVerdict } from "@/lib/db";
 import { useRoom } from "@/lib/room";
 
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z ]/g, "").trim();
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
 
 function matches(guess: string, truth: string) {
   const g = norm(guess);
   const t = norm(truth);
-  if (!g) return false;
+  if (!g || !t) return false;
+  
+  // Direct inclusion match
   if (t.includes(g) || g.includes(t)) return true;
-  const tokens = t.split(/\s+/).filter((w) => w.length > 3);
-  const hits = tokens.filter((w) => g.includes(w)).length;
-  return tokens.length > 0 && hits / tokens.length >= 0.5;
+
+  // Single word keyword match (e.g., "business" matching "business embezzlement")
+  const gWords = g.split(/\s+/).filter((w) => w.length >= 3);
+  const tWords = t.split(/\s+/).filter((w) => w.length >= 3);
+  
+  const hasKeywordHit = gWords.some((gw) => tWords.some((tw) => tw.includes(gw) || gw.includes(tw)));
+  if (hasKeywordHit) return true;
+
+  // Ratio check fallback
+  const hits = tWords.filter((w) => g.includes(w)).length;
+  return tWords.length > 0 && hits / tWords.length >= 0.3;
 }
 
 export function VerdictConsole() {
@@ -34,7 +44,9 @@ export function VerdictConsole() {
         keyEvidence: matches(verdict.keyEvidence, sol.keyEvidence),
       }
     : null;
-  const cracked = results ? results.culprit && (results.motive || results.keyEvidence) : false;
+
+  // Case is CRACKED as long as the culprit is correct
+  const cracked = results ? results.culprit : false;
 
   const submit = () => {
     if (!form.culprit.trim()) {
@@ -42,12 +54,14 @@ export function VerdictConsole() {
       return;
     }
     setVerdict(form);
-    const wasCracked =
-      matches(form.culprit, sol.culprit) &&
-      (matches(form.motive, sol.motive) || matches(form.keyEvidence, sol.keyEvidence));
+    
+    // Cracked if culprit is matched
+    const wasCracked = matches(form.culprit, sol.culprit);
+
     void saveVerdict({ ...form, caseTitle: caseFile.title, cracked: wasCracked, roomCode: roomId })
       .then((r) => r && toast.success("Verdict archived to your database."))
       .catch((e) => toast.error(`Database save failed: ${e.message}`));
+
     addLog(
       "Verdict filed",
       `Culprit: ${form.culprit} · Motive: ${form.motive} · Weapon: ${form.weapon} · Evidence: ${form.keyEvidence}`,
@@ -72,7 +86,7 @@ export function VerdictConsole() {
           </h2>
           <p className="mt-3 text-xl text-muted-foreground">
             {cracked
-              ? "The club named the right hand behind the crime."
+              ? "The club named the right culprit behind the crime!"
               : "The true culprit walked out of the room tonight."}
           </p>
         </section>
