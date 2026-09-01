@@ -13,7 +13,9 @@ export function CaseArchives() {
   const [openCase, setOpenCase] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const dbReady = Boolean(readDbConfig().url && readDbConfig().anonKey);
+
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  const dbReady = Boolean(envUrl || readDbConfig().url);
 
   const load = () => {
     if (!dbReady) return;
@@ -41,7 +43,7 @@ export function CaseArchives() {
       <section className="panel rounded-md p-8 text-center">
         <Archive className="mx-auto h-9 w-9 text-gold" />
         <p className="mt-3 text-base text-muted-foreground">
-          Connect the club database to build the Hall of Fame archive.
+          Connect your database to view the Hall of Fame archive.
         </p>
       </section>
     );
