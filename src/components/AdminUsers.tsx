@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listUsers, setUserStatus, type ClubUser } from "@/lib/auth";
 import { readDbConfig } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,18 @@ export function AdminUsers() {
   const [loading, setLoading] = useState(false);
   const dbReady = Boolean(readDbConfig().url && readDbConfig().anonKey);
 
-  const load = () => {
+  const load = useCallback(() => {
     if (!dbReady) return;
     setLoading(true);
     listUsers()
       .then(setUsers)
       .catch((e: Error) => toast.error(e.message))
       .finally(() => setLoading(false));
-  };
+  }, [dbReady]);
 
-  useEffect(load, [dbReady]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const decide = (u: ClubUser, status: ClubUser["status"]) => {
     void setUserStatus(u.id, status)
