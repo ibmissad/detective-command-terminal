@@ -37,7 +37,10 @@ export function SessionManager() {
     const state: SessionState = { caseFile, log, unlocked, verdict, chats: readThreads() };
     void saveSession(roomId, state, Boolean(verdict))
       .then((r) => {
-        if (!r) return toast.error("Connect the club database first.");
+        if (!r) {
+          toast.error("Connect the club database first.");
+          return;
+        }
         toast.success("Session saved. Resume it any time.");
         load();
       })
