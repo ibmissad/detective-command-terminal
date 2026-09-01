@@ -154,11 +154,11 @@ export function InterrogationTerminal() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-      <div className="panel flex min-h-[38rem] flex-col rounded-md">
-        <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
-          <UserSearch className="h-5 w-5 text-gold" />
+      <div className="panel flex min-h-[32rem] flex-col rounded-md sm:min-h-[38rem]">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-3 sm:gap-3 sm:px-5 sm:py-4">
+          <UserSearch className="hidden h-5 w-5 text-gold sm:block" />
           <Select value={suspectId} onValueChange={setSuspectId}>
-            <SelectTrigger className="h-11 w-72 border-border bg-surface-2 text-base">
+            <SelectTrigger className="h-11 w-full border-border bg-surface-2 text-base sm:w-72">
               <SelectValue placeholder="Select suspect" />
             </SelectTrigger>
             <SelectContent className="bg-popover">
@@ -169,11 +169,12 @@ export function InterrogationTerminal() {
               ))}
             </SelectContent>
           </Select>
-          <span className="label-caps">Live channel open</span>
-          <div className="ml-auto flex items-center gap-2">
+          <span className="label-caps hidden sm:inline">Live channel open</span>
+          <div className="ml-auto flex flex-wrap items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="sm"
+              className="min-h-11"
               onClick={() => setThreads((p) => ({ ...p, [suspect.id]: [] }))}
             >
               <Trash2 className="mr-1 h-4 w-4" /> Clear
@@ -183,7 +184,7 @@ export function InterrogationTerminal() {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:space-y-5 sm:px-6 sm:py-6">
           <p className="font-mono text-sm text-muted-foreground">
             {suspect.name} takes the chair. {suspect.publicBio}
           </p>
@@ -196,7 +197,7 @@ export function InterrogationTerminal() {
                 {m.role === "investigator" ? `[${m.author ?? "Detective"}]` : suspect.name}
               </div>
               <p
-                className={`mt-1 inline-block max-w-3xl rounded-md px-5 py-3 text-2xl leading-snug ${
+                className={`mt-1 inline-block max-w-full break-words rounded-md px-4 py-2.5 text-lg leading-snug sm:max-w-3xl sm:px-5 sm:py-3 sm:text-2xl ${
                   m.role === "investigator"
                     ? "bg-secondary text-secondary-foreground"
                     : "border border-gold-dim bg-surface-2 text-gold"
