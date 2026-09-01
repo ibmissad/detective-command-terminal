@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useRoom } from "@/lib/room";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,26 @@ export function HostGate({ children }: { children: ReactNode }) {
   const { isHost, hostUnlocked, setHostUnlocked } = useRoom();
   const [code, setCode] = useState("");
   const [newCode, setNewCode] = useState("");
+
+  const handleUnlock = (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    if (tryUnlockHost(code)) {
+      setHostUnlocked(true);
+      toast.success("Host console unlocked.");
+    } else {
+      toast.error("Incorrect passcode.");
+    }
+  };
+
+  const handleChangePasscode = () => {
+    if (!newCode.trim()) {
+      toast.error("Enter a new passcode.");
+      return;
+    }
+    setHostPasscode(newCode);
+    setNewCode("");
+    toast.success("Host passcode updated.");
+  };
 
   if (!isHost) {
     return (
@@ -33,30 +53,18 @@ export function HostGate({ children }: { children: ReactNode }) {
         <p className="mt-2 text-base text-muted-foreground">
           Enter the host passcode to unlock the Game Master console. Default: {DEFAULT_HOST_PASSCODE}
         </p>
-        <Input
-          type="password"
-          value={code}
-          inputMode="numeric"
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key !== "Enter") return;
-            if (tryUnlockHost(code)) setHostUnlocked(true);
-            else toast.error("Incorrect passcode.");
-          }}
-          className="mx-auto mt-6 h-14 max-w-[16rem] border-border bg-surface-2 text-center font-mono text-3xl tracking-[0.4em] text-gold"
-        />
-        <Button
-          size="lg"
-          className="mt-4 w-full max-w-[16rem]"
-          onClick={() => {
-            if (tryUnlockHost(code)) {
-              setHostUnlocked(true);
-              toast.success("Host console unlocked.");
-            } else toast.error("Incorrect passcode.");
-          }}
-        >
-          Unlock console
-        </Button>
+        <form onSubmit={handleUnlock} className="mt-6 space-y-4">
+          <Input
+            type="password"
+            value={code}
+            inputMode="numeric"
+            onChange={(e) => setCode(e.target.value)}
+            className="mx-auto h-14 max-w-[16rem] border-border bg-surface-2 text-center font-mono text-3xl tracking-[0.4em] text-gold"
+          />
+          <Button type="submit" size="lg" className="w-full max-w-[16rem]">
+            Unlock console
+          </Button>
+        </form>
       </section>
     );
   }
@@ -72,19 +80,7 @@ export function HostGate({ children }: { children: ReactNode }) {
           onChange={(e) => setNewCode(e.target.value)}
           className="h-9 w-44 border-border bg-surface font-mono"
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            if (!newCode.trim()) {
-              toast.error("Enter a new passcode.");
-              return;
-            }
-            setHostPasscode(newCode);
-            setNewCode("");
-            toast.success("Host passcode updated.");
-          }}
-        >
+        <Button variant="outline" size="sm" onClick={handleChangePasscode}>
           Change passcode
         </Button>
         <Button
