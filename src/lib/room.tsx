@@ -82,18 +82,19 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     }
 
     const channel = db.channel(`scc-room-${roomId}`, {
-      config: { broadcast: { self: false }, presence: { key: `${alias}-${Math.random().toString(36).slice(2, 7)}` } },
+      config: { broadcast: { self: false }, presence: { key: alias } },
     });
 
     channel
       .on("broadcast", { event: "scc" }, ({ payload }) => dispatch(payload as RoomEvent))
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<{ alias: string; host: boolean }>();
-        setMembers(
-          Object.values(state)
-            .flat()
-            .map((p) => ({ alias: p.alias, host: p.host })),
-        );
+        const activeMembers = Object.values(state)
+          .flat()
+          .map((p) => ({ alias: p.alias, host: p.host }));
+        
+        setMembers(activeMembers);
+        setOnline(activeMembers.length > 0);
       })
       .on(
         "postgres_changes",
@@ -105,11 +106,11 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "cases" }, () => {
         /* archived cases stream */
       })
-      .subscribe((status) => {
+      .subscribe(async (status) => {
         const ok = status === "SUBSCRIBED";
         setOnline(ok);
         if (ok) {
-          void channel.track({ alias, host: isHost });
+          await channel.track({ alias, host: isHost });
           if (!isHost) dispatch({ type: "sync-request", by: alias });
         }
       });
