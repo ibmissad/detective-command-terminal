@@ -76,7 +76,10 @@ export function HostGate({ children }: { children: ReactNode }) {
           variant="outline"
           size="sm"
           onClick={() => {
-            if (!newCode.trim()) return toast.error("Enter a new passcode.");
+            if (!newCode.trim()) {
+              toast.error("Enter a new passcode.");
+              return;
+            }
             setHostPasscode(newCode);
             setNewCode("");
             toast.success("Host passcode updated.");
