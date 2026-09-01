@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { KeyRound } from "lucide-react";
+import { KeyRound, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export function ApiKeyDialog() {
@@ -18,56 +18,80 @@ export function ApiKeyDialog() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
 
+  const envKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+  const isEnvActive = !apiKey && Boolean(envKey);
+
   return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
         setOpen(o);
-        if (o) setDraft(apiKey);
+        if (o) setDraft(apiKey || envKey);
       }}
     >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="border-gold-dim text-gold">
           <KeyRound className="mr-1 h-4 w-4" />
-          {apiKey ? "Key set" : "Set API key"}
+          {apiKey ? "Custom Key Set" : isEnvActive ? "Key Active (Env)" : "Set API Key"}
         </Button>
       </DialogTrigger>
       <DialogContent className="border-border bg-surface">
         <DialogHeader>
-          <DialogTitle className="text-gold">Gemini API Key</DialogTitle>
+          <DialogTitle className="text-gold flex items-center gap-2">
+            <KeyRound className="h-5 w-5" /> Gemini API Key
+          </DialogTitle>
           <DialogDescription>
-            Stored only in this browser's local storage, never uploaded or shared. Clear it after
-            the meeting if the machine is shared. Get a key from Google AI Studio.
+            {isEnvActive ? (
+              <span className="flex items-center gap-1 text-success font-medium">
+                <CheckCircle className="h-4 w-4" /> Active key loaded from environment variables.
+              </span>
+            ) : (
+              "Stored locally in your browser. Get your free key from Google AI Studio."
+            )}
           </DialogDescription>
         </DialogHeader>
+
         <Input
           type="password"
           autoComplete="off"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="AIza…"
-          className="h-12 border-border bg-surface-2 font-mono"
+          className="h-12 border-border bg-surface-2 font-mono text-base"
         />
-        <div className="flex justify-between gap-2">
+
+        <div className="flex justify-between gap-2 pt-2">
           <Button
             variant="ghost"
             onClick={() => {
               setApiKey("");
-              setDraft("");
-              toast.success("Key cleared from this device.");
+              setDraft(envKey);
+              toast.success("Reset to default environment key.");
             }}
           >
-            Clear key
+            Reset to Env
           </Button>
-          <Button
-            onClick={() => {
-              setApiKey(draft.trim());
-              setOpen(false);
-              toast.success("Key saved locally.");
-            }}
-          >
-            Save key
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setApiKey("");
+                setDraft("");
+                toast.success("Key cleared.");
+              }}
+            >
+              Clear
+            </Button>
+            <Button
+              onClick={() => {
+                setApiKey(draft.trim());
+                setOpen(false);
+                toast.success("Custom key saved locally.");
+              }}
+            >
+              Save Key
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
