@@ -102,114 +102,113 @@ export function GameMasterConsole() {
       </TabsContent>
 
       <TabsContent value="forge" className="grid gap-6 xl:grid-cols-2">
-      <RoomInvite />
-      <section className="panel rounded-md p-6">
-        <div className="flex items-center justify-between">
-          <span className="label-caps">Game Master · Case Forge</span>
-          <div className="flex gap-2">
-            <DatabaseConfigDialog />
-            <ApiKeyDialog />
-          </div>
-        </div>
-        <h2 className="mt-2 text-2xl text-gold">Generate a new mystery</h2>
-        <p className="mt-2 text-base text-muted-foreground">
-          Enter a brief case concept (e.g. "Stolen diamond at a museum gala"). The engine writes
-          suspect profiles with hidden motives and alibis, physical clues, six scene hotspots, and
-          the exact true solution.
-        </p>
-        <div className="mt-4 grid gap-2">
-          <Label htmlFor="difficulty" className="label-caps text-muted-foreground">
-            Case difficulty
-          </Label>
-          <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
-            <SelectTrigger id="difficulty" className="w-full border-border bg-surface-2 text-lg sm:w-64">
-              <SelectValue placeholder="Select difficulty" />
-            </SelectTrigger>
-            <SelectContent className="bg-surface-2 border-border">
-              <SelectItem value="easy" className="text-base">Easy</SelectItem>
-              <SelectItem value="medium" className="text-base">Medium</SelectItem>
-              <SelectItem value="hard" className="text-base">Hard</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Textarea
-          value={concept}
-          onChange={(e) => setConcept(e.target.value)}
-          rows={4}
-          placeholder="Stolen diamond at a museum gala…"
-          className="mt-4 border-border bg-surface-2 text-lg"
-        />
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button onClick={generate} disabled={busy} size="lg">
-            <Wand2 className="mr-2 h-5 w-5" />
-            {busy ? "Forging case…" : "Generate case"}
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => {
-              setCaseFile(DEFAULT_CASE);
-              resetSession();
-              toast.success("Restored the built-in case.");
-            }}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" /> Load built-in case
-          </Button>
-          <Button variant="ghost" size="lg" onClick={resetSession}>
-            Reset session
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => {
-              void saveCase(caseFile, roomId)
-                .then((r) =>
-                  r
-                    ? toast.success("Current case archived.")
-                    : toast.error("Connect a database first."),
-                )
-                .catch((e) => toast.error(`Database save failed: ${e.message}`));
-            }}
-
-          >
-            Archive current case
-          </Button>
-        </div>
-      </section>
-
-      <section className="panel rounded-md p-6">
-        <div className="flex items-center justify-between">
-          <span className="label-caps">Sealed Solution — Game Master eyes only</span>
-          <Button variant="ghost" size="sm" onClick={() => setRevealed((r) => !r)}>
-            {revealed ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
-            {revealed ? "Hide" : "Reveal"}
-          </Button>
-        </div>
-        {!revealed ? (
-          <p className="mt-6 font-mono text-base text-muted-foreground">
-            [ REDACTED ] Do not project this panel while the club is playing.
-          </p>
-        ) : (
-          <div className="mt-4 space-y-3 text-base">
-            <Row label="Culprit" value={caseFile.solution.culprit} />
-            <Row label="Motive" value={caseFile.solution.motive} />
-            <Row label="Weapon" value={caseFile.solution.weapon} />
-            <Row label="Key evidence" value={caseFile.solution.keyEvidence} />
-            <div>
-              <span className="label-caps">Hidden motives</span>
-              <ul className="mt-1 space-y-2">
-                {caseFile.suspects.map((s) => (
-                  <li key={s.id} className="text-foreground/85">
-                    <span className="text-gold">{s.name}</span>
-                    {s.isCulprit && <span className="ml-2 text-destructive">[CULPRIT]</span>} —{" "}
-                    {s.hiddenMotive}
-                  </li>
-                ))}
-              </ul>
+        <RoomInvite />
+        <section className="panel rounded-md p-6">
+          <div className="flex items-center justify-between">
+            <span className="label-caps">Game Master · Case Forge</span>
+            <div className="flex gap-2">
+              <DatabaseConfigDialog />
+              <ApiKeyDialog />
             </div>
           </div>
-        )}
-      </section>
+          <h2 className="mt-2 text-2xl text-gold">Generate a new mystery</h2>
+          <p className="mt-2 text-base text-muted-foreground">
+            Enter a brief case concept (e.g. "Stolen diamond at a museum gala"). The engine writes
+            suspect profiles with hidden motives and alibis, physical clues, six scene hotspots, and
+            the exact true solution.
+          </p>
+          <div className="mt-4 grid gap-2">
+            <Label htmlFor="difficulty" className="label-caps text-muted-foreground">
+              Case difficulty
+            </Label>
+            <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
+              <SelectTrigger id="difficulty" className="w-full border-border bg-surface-2 text-lg sm:w-64">
+                <SelectValue placeholder="Select difficulty" />
+              </SelectTrigger>
+              <SelectContent className="bg-surface-2 border-border">
+                <SelectItem value="easy" className="text-base">Easy</SelectItem>
+                <SelectItem value="medium" className="text-base">Medium</SelectItem>
+                <SelectItem value="hard" className="text-base">Hard</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Textarea
+            value={concept}
+            onChange={(e) => setConcept(e.target.value)}
+            rows={4}
+            placeholder="Stolen diamond at a museum gala…"
+            className="mt-4 border-border bg-surface-2 text-lg"
+          />
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button onClick={generate} disabled={busy} size="lg">
+              <Wand2 className="mr-2 h-5 w-5" />
+              {busy ? "Forging case…" : "Generate case"}
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                setCaseFile(DEFAULT_CASE);
+                resetSession();
+                toast.success("Restored the built-in case.");
+              }}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" /> Load built-in case
+            </Button>
+            <Button variant="ghost" size="lg" onClick={resetSession}>
+              Reset session
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                void saveCase(caseFile, roomId)
+                  .then((r) =>
+                    r
+                      ? toast.success("Current case archived.")
+                      : toast.error("Connect a database first."),
+                  )
+                  .catch((e) => toast.error(`Database save failed: ${e.message}`));
+              }}
+            >
+              Archive current case
+            </Button>
+          </div>
+        </section>
+
+        <section className="panel rounded-md p-6">
+          <div className="flex items-center justify-between">
+            <span className="label-caps">Sealed Solution — Game Master eyes only</span>
+            <Button variant="ghost" size="sm" onClick={() => setRevealed((r) => !r)}>
+              {revealed ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
+              {revealed ? "Hide" : "Reveal"}
+            </Button>
+          </div>
+          {!revealed ? (
+            <p className="mt-6 font-mono text-base text-muted-foreground">
+              [ REDACTED ] Do not project this panel while the club is playing.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-3 text-base">
+              <Row label="Culprit" value={caseFile.solution.culprit} />
+              <Row label="Motive" value={caseFile.solution.motive} />
+              <Row label="Weapon" value={caseFile.solution.weapon} />
+              <Row label="Key evidence" value={caseFile.solution.keyEvidence} />
+              <div>
+                <span className="label-caps">Hidden motives</span>
+                <ul className="mt-1 space-y-2">
+                  {caseFile.suspects.map((s) => (
+                    <li key={s.id} className="text-foreground/85">
+                      <span className="text-gold">{s.name}</span>
+                      {s.isCulprit && <span className="ml-2 text-destructive">[CULPRIT]</span>} —{" "}
+                      {s.hiddenMotive}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </section>
       </TabsContent>
     </Tabs>
   );
