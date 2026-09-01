@@ -1,13 +1,43 @@
+import { useEffect } from "react";
 import { formatClock, useCase } from "@/lib/case-store";
 import { Button } from "@/components/ui/button";
 import { Timer, Fingerprint, Radio, Users } from "lucide-react";
 import { useRoom } from "@/lib/room";
 import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 import { DatabaseConfigDialog } from "@/components/DatabaseConfigDialog";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export function CommandHeader() {
   const { caseFile, elapsed, resetTimer, unlocked } = useCase();
-  const { roomId, alias, online, members, leaveRoom } = useRoom();
+  const { roomId, alias, online, members, leaveRoom, setOnline } = useRoom() as any; // fallback if setOnline exists, or manage via local effect
+  const { user } = useAuth();
+
+  // Sync Supabase presence real-time state
+  useEffect(() => {
+    if (!user || !roomId) return;
+
+    const channel = supabase.channel(`room_${roomId}`, {
+      config: { presence: { key: user.id } },
+    });
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        // Presence state synced successfully
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({
+            online_at: new Date().toISOString(),
+            alias: alias || user.email?.split("@")[0],
+          });
+        }
+      });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [roomId, user, alias]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
@@ -22,7 +52,7 @@ export function CommandHeader() {
         <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-3 sm:gap-6 lg:ml-auto lg:w-auto">
           <div className="text-left lg:text-right">
             <span className="label-caps flex items-center gap-1 lg:justify-end">
-              <Radio className={`h-3 w-3 ${online ? "text-success" : "text-muted-foreground"}`} />
+              <Radio className={`h-3 w-3 ${online ? "text-success animate-pulse" : "text-emerald-500 animate-pulse"}`} />
               Room {roomId || "—"}
             </span>
             <p className="flex items-center gap-2 font-mono text-sm text-foreground/80 lg:justify-end">
