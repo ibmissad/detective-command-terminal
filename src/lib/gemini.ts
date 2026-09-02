@@ -1,10 +1,9 @@
 const ACTIVE_MODEL =
-  (import.meta.env["VITE_GEMINI_MODEL"] as string | undefined) ?? "gemini-3.6-flash";
+  (import.meta.env["VITE_GROQ_MODEL"] as string | undefined) ?? "llama-3.3-70b-versatile";
 
-const ENDPOINT =
-  `https://generativelanguage.googleapis.com/v1beta/models/${ACTIVE_MODEL}:generateContent`;
+const ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-export type GeminiTurn = { role: "user" | "model"; text: string };
+export type GeminiTurn = { role: "user" | "model" | "system"; text: string };
 
 export async function callGemini(
   apiKey: string,
@@ -12,28 +11,41 @@ export async function callGemini(
   turns: GeminiTurn[],
   jsonMode = false,
 ): Promise<string> {
-  const res = await fetch(`${ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
+  // Groq uses OpenAI format, so we map 'model' role to 'assistant' 
+  // and prepend the system instruction as a message.
+  const messages = [
+    { role: "system", content: systemInstruction },
+    ...turns.map((t) => ({
+      role: t.role === "model" ? "assistant" : "user",
+      content: t.text,
+    })),
+  ];
+
+  const res = await fetch(ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey.trim()}`,
+    },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      contents: turns.map((t) => ({ role: t.role, parts: [{ text: t.text }] })),
-      generationConfig: jsonMode
-        ? { responseMimeType: "application/json", temperature: 1 }
-        : { temperature: 0.9 },
+      model: ACTIVE_MODEL,
+      messages,
+      temperature: jsonMode ? 0.3 : 0.9,
+      response_format: jsonMode ? { type: "json_object" } : undefined,
     }),
   });
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Gemini ${res.status}: ${body.slice(0, 300)}`);
+    throw new Error(`Groq ${res.status}: ${body.slice(0, 300)}`);
   }
 
   const data = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
+    choices?: { message?: { content?: string } }[];
   };
-  const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
-  if (!text) throw new Error("Gemini returned an empty response.");
+  
+  const text = data.choices?.[0]?.message?.content ?? "";
+  if (!text) throw new Error("Groq returned an empty response.");
   return text;
 }
 
