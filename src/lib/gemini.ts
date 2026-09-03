@@ -2,7 +2,7 @@
 
 
 const ACTIVE_MODEL =
-  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "openrouter/free";
+  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "minimax/minimax-m3:free";
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 
