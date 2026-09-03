@@ -56,7 +56,7 @@ export function GameMasterConsole() {
       toast.error("Enter a case concept first.");
       return;
     }
-    if (!apiKey) {
+    if (!apiKey && !import.meta.env.VITE_OPENROUTER_API_KEY) {
       toast.error("Add your Gemini API key first.");
       return;
     }
