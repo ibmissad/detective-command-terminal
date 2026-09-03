@@ -1,12 +1,5 @@
 // Automatically satisfy frontend storage checks on load so the UI box registers a key
-if (typeof window !== "undefined") {
-  if (!localStorage.getItem("gemini_api_key")) {
-    localStorage.setItem("gemini_api_key", "env-injected-key");
-  }
-  if (!localStorage.getItem("openrouter_api_key")) {
-    localStorage.setItem("openrouter_api_key", "env-injected-key");
-  }
-}
+
 
 const ACTIVE_MODEL =
   (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "deepseek/deepseek-chat:free";
