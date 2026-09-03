@@ -153,22 +153,18 @@ export async function saveInterrogation(input: {
   roomCode?: string;
   alias?: string;
 }) {
-  export function getDb(): SupabaseClient | null {
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "";
-  const envAnon = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? "";
-  const local = readDbConfig();
-
-  // A manually saved override (if any) wins; otherwise fall back to the env vars automatically.
-  const url = (local.url || envUrl).trim().replace(/\/$/, "");
-  const anonKey = (local.anonKey || envAnon).trim();
-
-  if (!url || !anonKey) return null;
-
-  const key = `${url}|${anonKey}`;
-  if (cached?.key === key) return cached.client;
-  const client = createClient(url, anonKey, { auth: { persistSession: false } });
-  cached = { key, client };
-  return client;
+  const db = getDb();
+  if (!db) return null;
+  const { error } = await db.from("interrogation_logs").insert({
+    room_code: input.roomCode || null,
+    detective_alias: input.alias || null,
+    case_title: input.caseTitle,
+    suspect_name: input.suspectName,
+    question: input.question,
+    answer: input.answer,
+  });
+  if (error) throw new Error(error.message);
+  return true;
 }
 
 export async function saveVerdict(input: Verdict & { caseTitle: string; cracked: boolean; roomCode?: string }) {
