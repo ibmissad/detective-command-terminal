@@ -1,4 +1,4 @@
-// Automatically satisfy frontend storage checks on load
+// Automatically satisfy frontend storage checks on load so the UI box registers a key
 if (typeof window !== "undefined") {
   if (!localStorage.getItem("gemini_api_key")) {
     localStorage.setItem("gemini_api_key", "env-injected-key");
@@ -24,7 +24,7 @@ export async function callGemini(
   const resolvedKey = apiKey?.trim() || import.meta.env.VITE_OPENROUTER_API_KEY || "";
 
   if (!resolvedKey) {
-    throw new Error("Missing OpenRouter API key in environment variables.");
+    throw new Error("Missing OpenRouter API key. Check your .env file or Vercel environment variables.");
   }
 
   const messages = [
