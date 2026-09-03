@@ -24,8 +24,15 @@ export function writeDbConfig(cfg: DbConfig) {
 let cached: { key: string; client: SupabaseClient } | null = null;
 
 export function getDb(): SupabaseClient | null {
-  const { url, anonKey } = readDbConfig();
+  const envUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "";
+  const envAnon = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? "";
+  const local = readDbConfig();
+
+  const url = (local.url || envUrl).trim().replace(/\/$/, "");
+  const anonKey = (local.anonKey || envAnon).trim();
+
   if (!url || !anonKey) return null;
+
   const key = `${url}|${anonKey}`;
   if (cached?.key === key) return cached.client;
   const client = createClient(url, anonKey, { auth: { persistSession: false } });
