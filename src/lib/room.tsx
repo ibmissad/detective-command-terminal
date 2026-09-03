@@ -73,6 +73,10 @@ export function RoomProvider({ children }: { children: ReactNode }) {
     handlers.current.forEach((h) => h(event));
   }, []);
 
+  const publish = useCallback((event: RoomEvent) => {
+    void channelRef.current?.send({ type: "broadcast", event: "scc", payload: event });
+  }, []);
+
   useEffect(() => {
     if (!roomId || !alias) return;
     const db = getDb();
@@ -111,7 +115,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
         setOnline(ok);
         if (ok) {
           await channel.track({ alias, host: isHost });
-          if (!isHost) dispatch({ type: "sync-request", by: alias });
+          if (!isHost) publish({ type: "sync-request", by: alias });
         }
       });
 
@@ -122,11 +126,7 @@ export function RoomProvider({ children }: { children: ReactNode }) {
       setMembers([]);
       void db.removeChannel(channel);
     };
-  }, [roomId, alias, isHost, dispatch]);
-
-  const publish = useCallback((event: RoomEvent) => {
-    void channelRef.current?.send({ type: "broadcast", event: "scc", payload: event });
-  }, []);
+  }, [roomId, alias, isHost, dispatch, publish]);
 
   const enter = useCallback((code: string, name: string, host: boolean) => {
     const clean = code.replace(/\D/g, "").slice(0, 4);
