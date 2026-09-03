@@ -15,21 +15,22 @@ import { readDbConfig, writeDbConfig, getDb, SCHEMA_SQL } from "@/lib/db";
 
 export function DatabaseConfigDialog() {
   const [open, setOpen] = useState(false);
-  
-  // Default to env vars if available, fallback to local storage
   const envUrl = import.meta.env.VITE_SUPABASE_URL || "";
   const envAnon = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+  const envReady = Boolean(envUrl && envAnon);
 
   const [url, setUrl] = useState("");
   const [anonKey, setAnonKey] = useState("");
-  const [connected, setConnected] = useState(() => Boolean(envUrl || readDbConfig().url));
+  const [showOverride, setShowOverride] = useState(!envReady);
   const [testing, setTesting] = useState(false);
+
+  const connected = envReady || Boolean(readDbConfig().url && readDbConfig().anonKey);
 
   const test = async () => {
     setTesting(true);
     try {
       const db = getDb();
-      if (!db) throw new Error("Database client not initialized. Check URL and Key.");
+      if (!db) throw new Error("No database configured yet.");
       const { error } = await db.from("cases").select("id").limit(1);
       if (error) throw new Error(error.message);
       toast.success("Connection OK — tables reachable.");
@@ -47,8 +48,8 @@ export function DatabaseConfigDialog() {
         setOpen(o);
         if (o) {
           const cfg = readDbConfig();
-          setUrl(cfg.url || envUrl);
-          setAnonKey(cfg.anonKey || envAnon);
+          setUrl(cfg.url);
+          setAnonKey(cfg.anonKey);
         }
       }}
     >
@@ -64,87 +65,91 @@ export function DatabaseConfigDialog() {
             <Database className="h-5 w-5" /> Database Configuration
           </DialogTitle>
           <DialogDescription>
-            {envUrl ? (
+            {envReady ? (
               <span className="flex items-center gap-1 text-success font-medium">
-                <CheckCircle className="h-4 w-4" /> Pre-configured via Vercel Environment Variables.
+                <CheckCircle className="h-4 w-4" /> Connected automatically via Vercel environment
+                variables. No setup needed here.
               </span>
             ) : (
-              "Connect your Supabase project to archive generated cases, interrogation logs, and club verdicts."
+              "No environment variables detected. Enter your Supabase project details below."
             )}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <label className="label-caps">Project URL</label>
-            <Input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://xxxxx.supabase.co"
-              className="mt-1 h-12 border-border bg-surface-2 font-mono"
-            />
-          </div>
+        {envReady && !showOverride && (
+          <Button variant="ghost" size="sm" className="w-fit" onClick={() => setShowOverride(true)}>
+            Use a different database instead
+          </Button>
+        )}
 
-          <div>
-            <label className="label-caps">Anon / publishable key</label>
-            <Input
-              type="password"
-              autoComplete="off"
-              value={anonKey}
-              onChange={(e) => setAnonKey(e.target.value)}
-              placeholder="eyJ… or sb_publishable_…"
-              className="mt-1 h-12 border-border bg-surface-2 font-mono"
-            />
-          </div>
-
-          <div className="flex flex-wrap justify-between gap-2 pt-2">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                writeDbConfig({ url: "", anonKey: "" });
-                setUrl(envUrl);
-                setAnonKey(envAnon);
-                setConnected(Boolean(envUrl));
-                toast.success("Reset to default environment settings.");
-              }}
-            >
-              Reset to Env Defaults
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={test} disabled={testing}>
-                {testing ? "Testing…" : "Test connection"}
+        {(showOverride || !envReady) && (
+          <div className="space-y-4">
+            <div>
+              <label className="label-caps">Project URL</label>
+              <Input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://xxxxx.supabase.co"
+                className="mt-1 h-12 border-border bg-surface-2 font-mono"
+              />
+            </div>
+            <div>
+              <label className="label-caps">Anon / publishable key</label>
+              <Input
+                type="password"
+                autoComplete="off"
+                value={anonKey}
+                onChange={(e) => setAnonKey(e.target.value)}
+                placeholder="eyJ… or sb_publishable_…"
+                className="mt-1 h-12 border-border bg-surface-2 font-mono"
+              />
+            </div>
+            <div className="flex flex-wrap justify-between gap-2 pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  writeDbConfig({ url: "", anonKey: "" });
+                  setUrl("");
+                  setAnonKey("");
+                  toast.success("Override cleared — back to environment defaults.");
+                }}
+              >
+                Clear override
               </Button>
               <Button
                 onClick={() => {
                   writeDbConfig({ url, anonKey });
-                  setConnected(Boolean(url.trim() && anonKey.trim()));
-                  toast.success("Database settings saved.");
+                  toast.success("Override saved for this browser.");
                 }}
               >
-                Save
+                Save override
               </Button>
             </div>
           </div>
+        )}
 
-          <div className="pt-4">
-            <div className="flex items-center justify-between">
-              <span className="label-caps">Schema SQL Reference</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  void navigator.clipboard.writeText(SCHEMA_SQL);
-                  toast.success("Schema SQL copied.");
-                }}
-              >
-                Copy SQL
-              </Button>
-            </div>
-            <pre className="mt-2 max-h-48 overflow-auto rounded border border-border bg-surface-2 p-3 font-mono text-xs leading-relaxed text-foreground/80">
-              {SCHEMA_SQL}
-            </pre>
+        <div className="pt-4">
+          <div className="flex items-center justify-between">
+            <span className="label-caps">Schema SQL Reference</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                void navigator.clipboard.writeText(SCHEMA_SQL);
+                toast.success("Schema SQL copied.");
+              }}
+            >
+              Copy SQL
+            </Button>
           </div>
+          <pre className="mt-2 max-h-48 overflow-auto rounded border border-border bg-surface-2 p-3 font-mono text-xs leading-relaxed text-foreground/80">
+            {SCHEMA_SQL}
+          </pre>
         </div>
+
+        <Button variant="outline" onClick={test} disabled={testing}>
+          {testing ? "Testing…" : "Test connection"}
+        </Button>
       </DialogContent>
     </Dialog>
   );
