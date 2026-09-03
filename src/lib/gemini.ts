@@ -9,7 +9,7 @@ if (typeof window !== "undefined") {
 }
 
 const ACTIVE_MODEL =
-  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "meta-llama/llama-3.3-70b-instruct:free";
+  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "deepseek/deepseek-chat:free";
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 
