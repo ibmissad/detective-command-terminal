@@ -2,7 +2,7 @@
 
 
 const ACTIVE_MODEL =
-  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "google/gemini-2.0-flash-lite-preview-02-05:free";
+  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "openrouter/free";
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 
