@@ -1,7 +1,7 @@
 const ACTIVE_MODEL =
-  (import.meta.env["VITE_GROQ_MODEL"] as string | undefined) ?? "llama-3.3-70b-versatile";
+  (import.meta.env["VITE_OPENROUTER_MODEL"] as string | undefined) ?? "google/gemini-flash-1.5:free";
 
-const ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 
 export type GeminiTurn = { role: "user" | "model" | "system"; text: string };
 
@@ -11,8 +11,6 @@ export async function callGemini(
   turns: GeminiTurn[],
   jsonMode = false,
 ): Promise<string> {
-  // Groq uses OpenAI format, so we map 'model' role to 'assistant' 
-  // and prepend the system instruction as a message.
   const messages = [
     { role: "system", content: systemInstruction },
     ...turns.map((t) => ({
@@ -26,6 +24,8 @@ export async function callGemini(
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey.trim()}`,
+      "HTTP-Referer": window.location.origin,
+      "X-Title": "Sherlock Command Center",
     },
     body: JSON.stringify({
       model: ACTIVE_MODEL,
@@ -37,7 +37,7 @@ export async function callGemini(
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Groq ${res.status}: ${body.slice(0, 300)}`);
+    throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 300)}`);
   }
 
   const data = (await res.json()) as {
@@ -45,7 +45,7 @@ export async function callGemini(
   };
   
   const text = data.choices?.[0]?.message?.content ?? "";
-  if (!text) throw new Error("Groq returned an empty response.");
+  if (!text) throw new Error("OpenRouter returned an empty response.");
   return text;
 }
 
