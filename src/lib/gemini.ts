@@ -11,6 +11,12 @@ export async function callGemini(
   turns: GeminiTurn[],
   jsonMode = false,
 ): Promise<string> {
+  const resolvedKey = apiKey?.trim() || import.meta.env.VITE_OPENROUTER_API_KEY || "";
+
+  if (!resolvedKey) {
+    throw new Error("Missing OpenRouter API key. Check your .env file or Vercel environment variables.");
+  }
+
   const messages = [
     { role: "system", content: systemInstruction },
     ...turns.map((t) => ({
@@ -23,8 +29,8 @@ export async function callGemini(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey.trim()}`,
-      "HTTP-Referer": window.location.origin,
+      "Authorization": `Bearer ${resolvedKey}`,
+      "HTTP-Referer": typeof window !== "undefined" ? window.location.origin : "",
       "X-Title": "Sherlock Command Center",
     },
     body: JSON.stringify({
