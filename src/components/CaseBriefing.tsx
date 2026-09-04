@@ -151,12 +151,12 @@ export function CaseBriefing() {
           onSolved={solveSpot}
         />
 
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-gold" />
             <span className="label-caps">Initial Police Report</span>
           </div>
-          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-base leading-relaxed text-foreground/85">
+          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/85 sm:text-base">
             {caseFile.policeReport}
           </pre>
         </section>
@@ -188,13 +188,15 @@ export function CaseBriefing() {
         </section>
 
         {caseFile.clues.length > 0 && (
-          <section className="panel rounded-md p-6">
+          <section className="panel rounded-md p-4 sm:p-6">
             <span className="label-caps">Physical Evidence Transcripts</span>
             <div className="mt-4 space-y-4">
               {caseFile.clues.map((c) => (
                 <div key={c.id} className="border-l-2 border-gold-dim pl-4">
-                  <h3 className="text-xl text-gold">{c.title}</h3>
-                  <p className="mt-1 text-lg leading-relaxed text-foreground/85">{c.detail}</p>
+                  <h3 className="text-lg text-gold sm:text-xl">{c.title}</h3>
+                  <p className="mt-1 text-base leading-relaxed text-foreground/85 sm:text-lg">
+                    {c.detail}
+                  </p>
                 </div>
               ))}
             </div>
@@ -202,7 +204,7 @@ export function CaseBriefing() {
         )}
       </div>
 
-      <CaseLog className="h-[42rem] xl:sticky xl:top-6" />
+      <CaseLog className="h-[26rem] sm:h-[42rem] xl:sticky xl:top-6" />
 
       <Dialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)}>
         <DialogContent className="max-w-4xl border-border bg-surface">
