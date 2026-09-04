@@ -14,7 +14,7 @@ export function CaseArchives() {
   const [transcript, setTranscript] = useState<TranscriptRow[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  const envUrl = import.meta.env["VITE_SUPABASE_URL"] || "";
   const dbReady = Boolean(envUrl || readDbConfig().url);
 
   const load = () => {

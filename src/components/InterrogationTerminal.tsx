@@ -46,7 +46,7 @@ export function InterrogationTerminal() {
   const endRef = useRef<HTMLDivElement>(null);
 
   // Fallback to environment variable if state key isn't explicitly set
-  const effectiveApiKey = apiKey || import.meta.env.VITE_OPENROUTER_API_KEY || "";
+  const effectiveApiKey = apiKey || import.meta.env["VITE_OPENROUTER_API_KEY"] || "";
 
   const suspect = useMemo(
     () => caseFile.suspects.find((s) => s.id === suspectId) ?? caseFile.suspects[0],

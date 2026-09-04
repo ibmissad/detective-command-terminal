@@ -18,7 +18,7 @@ export function ApiKeyDialog() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
 
-  const envKey = import.meta.env.VITE_OPENROUTER_API_KEY || "";
+  const envKey = import.meta.env["VITE_OPENROUTER_API_KEY"] || "";
   const isEnvActive = !apiKey && Boolean(envKey);
 
   return (

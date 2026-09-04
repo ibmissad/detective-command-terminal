@@ -14,7 +14,7 @@ export async function callGemini(
   turns: GeminiTurn[],
   jsonMode = false,
 ): Promise<string> {
-  const resolvedKey = apiKey?.trim() || import.meta.env.VITE_OPENROUTER_API_KEY || "";
+  const resolvedKey = apiKey?.trim() || import.meta.env["VITE_OPENROUTER_API_KEY"] || "";
 
   if (!resolvedKey) {
     throw new Error("Missing OpenRouter API key. Check your .env file or Vercel environment variables.");

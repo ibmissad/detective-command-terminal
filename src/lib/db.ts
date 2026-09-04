@@ -24,8 +24,8 @@ export function writeDbConfig(cfg: DbConfig) {
 let cached: { key: string; client: SupabaseClient } | null = null;
 
 export function getDb(): SupabaseClient | null {
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "";
-  const envAnon = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? "";
+  const envUrl = (import.meta.env["VITE_SUPABASE_URL"] as string | undefined) ?? "";
+  const envAnon = (import.meta.env["VITE_SUPABASE_ANON_KEY"] as string | undefined) ?? "";
   const local = readDbConfig();
 
   const url = (local.url || envUrl).trim().replace(/\/$/, "");
