@@ -80,15 +80,15 @@ export function CaseBriefing() {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-6">
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <span className="label-caps">Master Case File</span>
-          <h2 className="mt-2 text-3xl font-semibold text-gold">{caseFile.title}</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-gold sm:text-3xl">{caseFile.title}</h2>
           <div className="gold-rule my-4" />
-          <p className="text-lg leading-relaxed text-foreground/90">{caseFile.overview}</p>
+          <p className="text-base leading-relaxed text-foreground/90 sm:text-lg">{caseFile.overview}</p>
         </section>
 
         <section className="panel overflow-hidden rounded-md">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
             <div>
               <span className="label-caps">
                 {theme.name} — {unlocked.length}/{caseFile.hotspots.length} points examined
@@ -97,7 +97,7 @@ export function CaseBriefing() {
                 {theme.tagline}
               </p>
             </div>
-            <span className="font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
+            <span className="hidden font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground sm:inline">
               Solve the mini-puzzle to unlock a lead
             </span>
           </div>
