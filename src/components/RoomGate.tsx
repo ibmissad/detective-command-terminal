@@ -51,12 +51,12 @@ export function RoomGate() {
   return (
     <Dialog open={!joined}>
       <DialogContent
-        className="border-gold-dim bg-surface sm:max-w-xl [&>button]:hidden"
+        className="max-h-[90dvh] w-[calc(100vw-1.5rem)] overflow-y-auto border-gold-dim bg-surface sm:max-w-xl [&>button]:hidden"
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-3xl text-gold">
+          <DialogTitle className="flex items-center gap-2 text-2xl text-gold sm:text-3xl">
             <Radio className="h-6 w-6" /> Enter the Session
           </DialogTitle>
           <DialogDescription className="text-base">

@@ -80,15 +80,15 @@ export function CaseBriefing() {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-6">
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <span className="label-caps">Master Case File</span>
-          <h2 className="mt-2 text-3xl font-semibold text-gold">{caseFile.title}</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-gold sm:text-3xl">{caseFile.title}</h2>
           <div className="gold-rule my-4" />
-          <p className="text-lg leading-relaxed text-foreground/90">{caseFile.overview}</p>
+          <p className="text-base leading-relaxed text-foreground/90 sm:text-lg">{caseFile.overview}</p>
         </section>
 
         <section className="panel overflow-hidden rounded-md">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
             <div>
               <span className="label-caps">
                 {theme.name} — {unlocked.length}/{caseFile.hotspots.length} points examined
@@ -97,7 +97,7 @@ export function CaseBriefing() {
                 {theme.tagline}
               </p>
             </div>
-            <span className="font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
+            <span className="hidden font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground sm:inline">
               Solve the mini-puzzle to unlock a lead
             </span>
           </div>
@@ -121,7 +121,7 @@ export function CaseBriefing() {
                   aria-label={`${found ? "Review" : "Investigate"} ${h.label} — ${CUE_LABEL[cue]}`}
                   title={found ? h.label : `${CUE_LABEL[cue]} · locked`}
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
-                  className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border-2 px-3 py-2 backdrop-blur-sm transition-transform hover:scale-110 ${
+                  className={`absolute flex min-h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-full border-2 px-3 py-2 backdrop-blur-sm transition-transform hover:scale-110 ${
                     found
                       ? "border-gold bg-gold/25 text-gold"
                       : "hotspot-pulse border-gold bg-background/75 text-gold"
@@ -151,12 +151,12 @@ export function CaseBriefing() {
           onSolved={solveSpot}
         />
 
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-gold" />
             <span className="label-caps">Initial Police Report</span>
           </div>
-          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-base leading-relaxed text-foreground/85">
+          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground/85 sm:text-base">
             {caseFile.policeReport}
           </pre>
         </section>
@@ -188,13 +188,15 @@ export function CaseBriefing() {
         </section>
 
         {caseFile.clues.length > 0 && (
-          <section className="panel rounded-md p-6">
+          <section className="panel rounded-md p-4 sm:p-6">
             <span className="label-caps">Physical Evidence Transcripts</span>
             <div className="mt-4 space-y-4">
               {caseFile.clues.map((c) => (
                 <div key={c.id} className="border-l-2 border-gold-dim pl-4">
-                  <h3 className="text-xl text-gold">{c.title}</h3>
-                  <p className="mt-1 text-lg leading-relaxed text-foreground/85">{c.detail}</p>
+                  <h3 className="text-lg text-gold sm:text-xl">{c.title}</h3>
+                  <p className="mt-1 text-base leading-relaxed text-foreground/85 sm:text-lg">
+                    {c.detail}
+                  </p>
                 </div>
               ))}
             </div>
@@ -202,7 +204,7 @@ export function CaseBriefing() {
         )}
       </div>
 
-      <CaseLog className="h-[42rem] xl:sticky xl:top-6" />
+      <CaseLog className="h-[26rem] sm:h-[42rem] xl:sticky xl:top-6" />
 
       <Dialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)}>
         <DialogContent className="max-w-4xl border-border bg-surface">

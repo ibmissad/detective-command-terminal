@@ -56,7 +56,7 @@ export function GameMasterConsole() {
       toast.error("Enter a case concept first.");
       return;
     }
-    if (!apiKey && !import.meta.env.VITE_OPENROUTER_API_KEY) {
+    if (!apiKey && !import.meta.env["VITE_OPENROUTER_API_KEY"]) {
       toast.error("Add your Gemini API key first.");
       return;
     }
@@ -87,11 +87,19 @@ export function GameMasterConsole() {
 
   return (
     <Tabs defaultValue="forge" className="space-y-6">
-      <TabsList className="w-full justify-start">
-        <TabsTrigger value="forge">Case Forge</TabsTrigger>
-        <TabsTrigger value="users">Admin · Users</TabsTrigger>
-        <TabsTrigger value="sessions">Save / Resume</TabsTrigger>
-      </TabsList>
+      <div className="-mx-1 overflow-x-auto px-1">
+        <TabsList className="w-max min-w-full justify-start">
+          <TabsTrigger value="forge" className="min-h-11 shrink-0">
+            Case Forge
+          </TabsTrigger>
+          <TabsTrigger value="users" className="min-h-11 shrink-0">
+            Admin · Users
+          </TabsTrigger>
+          <TabsTrigger value="sessions" className="min-h-11 shrink-0">
+            Save / Resume
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
       <TabsContent value="users">
         <AdminUsers />
@@ -103,7 +111,7 @@ export function GameMasterConsole() {
 
       <TabsContent value="forge" className="grid gap-6 xl:grid-cols-2">
         <RoomInvite />
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="label-caps">Game Master · Case Forge</span>
             <div className="flex gap-2">
@@ -176,7 +184,7 @@ export function GameMasterConsole() {
           </div>
         </section>
 
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="label-caps">Sealed Solution — Game Master eyes only</span>
             <Button variant="ghost" size="sm" onClick={() => setRevealed((r) => !r)}>

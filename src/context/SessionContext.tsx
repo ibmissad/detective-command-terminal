@@ -35,7 +35,7 @@ export const SessionProvider: React.FC<{
         .single();
 
       if (data && !error) {
-        setActiveCaseId(data.active_case_id);
+        setActiveCaseId(data["active_case_id"]);
       }
     };
 
@@ -53,7 +53,7 @@ export const SessionProvider: React.FC<{
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          const newCaseId = payload.new.active_case_id;
+          const newCaseId = payload.new["active_case_id"];
           if (newCaseId && newCaseId !== activeCaseId) {
             setActiveCaseId(newCaseId);
             toast.info("Active case updated by Host.");

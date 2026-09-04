@@ -15,8 +15,8 @@ import { readDbConfig, writeDbConfig, getDb, SCHEMA_SQL } from "@/lib/db";
 
 export function DatabaseConfigDialog() {
   const [open, setOpen] = useState(false);
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || "";
-  const envAnon = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+  const envUrl = import.meta.env["VITE_SUPABASE_URL"] || "";
+  const envAnon = import.meta.env["VITE_SUPABASE_ANON_KEY"] || "";
   const envReady = Boolean(envUrl && envAnon);
 
   const [url, setUrl] = useState("");

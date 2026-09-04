@@ -60,7 +60,7 @@ export function SessionManager() {
   };
 
   return (
-    <section className="panel rounded-md p-6">
+    <section className="panel rounded-md p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="label-caps flex items-center gap-2">
           <History className="h-4 w-4 text-gold" /> Save &amp; resume
