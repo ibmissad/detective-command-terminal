@@ -72,9 +72,10 @@ export function CommandHeader() {
               {unlocked.length}/{caseFile.hotspots.length}
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded border border-gold-dim px-3 py-2 sm:px-4">
-            <Timer className="h-5 w-5 text-gold" />
-            <span className="font-mono text-xl tabular-nums text-gold sm:text-2xl">
+          <RoomTimer />
+          <div className="hidden items-center gap-2 rounded border border-border px-3 py-2 xl:flex">
+            <Timer className="h-4 w-4 text-muted-foreground" />
+            <span className="font-mono text-sm tabular-nums text-muted-foreground">
               {formatClock(elapsed)}
             </span>
           </div>
@@ -82,7 +83,7 @@ export function CommandHeader() {
             <ApiKeyDialog />
             <DatabaseConfigDialog />
             <Button variant="ghost" size="sm" className="min-h-9" onClick={resetTimer}>
-              Reset timer
+              Reset session clock
             </Button>
             <Button variant="ghost" size="sm" className="min-h-9" onClick={leaveRoom}>
               Leave
