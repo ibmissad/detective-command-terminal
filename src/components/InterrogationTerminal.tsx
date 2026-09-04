@@ -212,16 +212,21 @@ export function InterrogationTerminal() {
           <div ref={endRef} />
         </div>
 
-        <div className="flex gap-3 border-t border-border p-4">
+        <div className="flex gap-2 border-t border-border p-3 sm:gap-3 sm:p-4">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Put your question to the suspect…"
-            className="h-14 border-border bg-surface-2 text-xl"
+            className="h-12 border-border bg-surface-2 text-base sm:h-14 sm:text-xl"
           />
-          <Button onClick={send} disabled={busy} size="lg" className="h-14 px-8 text-base">
-            <Send className="mr-2 h-5 w-5" /> Ask
+          <Button
+            onClick={send}
+            disabled={busy}
+            size="lg"
+            className="h-12 shrink-0 px-5 text-base sm:h-14 sm:px-8"
+          >
+            <Send className="h-5 w-5 sm:mr-2" /> <span className="hidden sm:inline">Ask</span>
           </Button>
         </div>
       </div>
