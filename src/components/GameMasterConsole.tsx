@@ -103,7 +103,7 @@ export function GameMasterConsole() {
 
       <TabsContent value="forge" className="grid gap-6 xl:grid-cols-2">
         <RoomInvite />
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="label-caps">Game Master · Case Forge</span>
             <div className="flex gap-2">
@@ -176,7 +176,7 @@ export function GameMasterConsole() {
           </div>
         </section>
 
-        <section className="panel rounded-md p-6">
+        <section className="panel rounded-md p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <span className="label-caps">Sealed Solution — Game Master eyes only</span>
             <Button variant="ghost" size="sm" onClick={() => setRevealed((r) => !r)}>

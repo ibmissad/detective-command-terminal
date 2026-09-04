@@ -100,7 +100,7 @@ export function VerdictConsole() {
         </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className="panel rounded-md p-6">
+          <section className="panel rounded-md p-4 sm:p-6">
             <span className="label-caps">Verdict vs. Truth</span>
             <div className="mt-4 space-y-4">
               {(["culprit", "motive", "weapon", "keyEvidence"] as const).map((k) => (
@@ -124,7 +124,7 @@ export function VerdictConsole() {
             </div>
           </section>
 
-          <section className="panel rounded-md p-6">
+          <section className="panel rounded-md p-4 sm:p-6">
             <span className="label-caps">Post-mortem — Logic breakdown</span>
             <p className="mt-3 text-lg leading-relaxed text-foreground/90">{sol.breakdown}</p>
           </section>

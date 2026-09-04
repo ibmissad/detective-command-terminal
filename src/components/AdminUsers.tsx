@@ -44,7 +44,7 @@ export function AdminUsers() {
   const rest = users.filter((u) => u.status !== "pending");
 
   return (
-    <section className="panel rounded-md p-6">
+    <section className="panel rounded-md p-4 sm:p-6">
       <div className="flex items-center justify-between">
         <span className="label-caps flex items-center gap-2">
           <Users className="h-4 w-4 text-gold" /> Admin · User management

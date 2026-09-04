@@ -51,7 +51,7 @@ export function CaseArchives() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-2">
-      <section className="panel rounded-md p-6">
+      <section className="panel rounded-md p-4 sm:p-6">
         <div className="flex items-center justify-between">
           <span className="label-caps flex items-center gap-2">
             <Trophy className="h-4 w-4 text-gold" /> Hall of Fame — filed verdicts
@@ -95,7 +95,7 @@ export function CaseArchives() {
         </ul>
       </section>
 
-      <section className="panel rounded-md p-6">
+      <section className="panel rounded-md p-4 sm:p-6">
         <span className="label-caps flex items-center gap-2">
           <MessagesSquare className="h-4 w-4 text-gold" />
           {openCase ? `Transcript — ${openCase}` : "Interrogation transcript"}
