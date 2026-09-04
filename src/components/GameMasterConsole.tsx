@@ -87,11 +87,19 @@ export function GameMasterConsole() {
 
   return (
     <Tabs defaultValue="forge" className="space-y-6">
-      <TabsList className="w-full justify-start">
-        <TabsTrigger value="forge">Case Forge</TabsTrigger>
-        <TabsTrigger value="users">Admin · Users</TabsTrigger>
-        <TabsTrigger value="sessions">Save / Resume</TabsTrigger>
-      </TabsList>
+      <div className="-mx-1 overflow-x-auto px-1">
+        <TabsList className="w-max min-w-full justify-start">
+          <TabsTrigger value="forge" className="min-h-11 shrink-0">
+            Case Forge
+          </TabsTrigger>
+          <TabsTrigger value="users" className="min-h-11 shrink-0">
+            Admin · Users
+          </TabsTrigger>
+          <TabsTrigger value="sessions" className="min-h-11 shrink-0">
+            Save / Resume
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
       <TabsContent value="users">
         <AdminUsers />
