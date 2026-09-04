@@ -121,7 +121,7 @@ export function CaseBriefing() {
                   aria-label={`${found ? "Review" : "Investigate"} ${h.label} — ${CUE_LABEL[cue]}`}
                   title={found ? h.label : `${CUE_LABEL[cue]} · locked`}
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
-                  className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border-2 px-3 py-2 backdrop-blur-sm transition-transform hover:scale-110 ${
+                  className={`absolute flex min-h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-full border-2 px-3 py-2 backdrop-blur-sm transition-transform hover:scale-110 ${
                     found
                       ? "border-gold bg-gold/25 text-gold"
                       : "hotspot-pulse border-gold bg-background/75 text-gold"
