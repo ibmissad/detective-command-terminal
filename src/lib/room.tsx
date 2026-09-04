@@ -23,6 +23,10 @@ export type RoomEvent =
   | { type: "log"; entry: LogEntry }
   | { type: "case"; caseFile: CaseFile }
   | { type: "verdict"; verdict: Verdict | null }
+  | {
+      type: "timer";
+      timer: { durationMs: number; remainingMs: number; running: boolean; locked: boolean };
+    }
   | { type: "sync-request"; by: string }
   | { type: "sync-state"; caseFile: CaseFile; log: LogEntry[]; unlocked: string[] };
 
