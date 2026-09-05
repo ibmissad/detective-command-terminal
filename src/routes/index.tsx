@@ -88,6 +88,7 @@ function Index() {
           </Tabs>
         </main>
       </div>
+      </TimerProvider>
       </CaseProvider>
     </RoomProvider>
   );
