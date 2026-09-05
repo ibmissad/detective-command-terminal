@@ -21,11 +21,10 @@ import {
   Lock,
 } from "lucide-react";
 
-const GALLERY = [
-  { src: evidence1, title: "Exhibit A — Case glass fragment", note: "Latent print, unmatched." },
-  { src: evidence2, title: "Exhibit B — Partial burned note", note: "Recovered from the grate." },
-  { src: evidence3, title: "Exhibit C — Impression cast", note: "Garden path, east side." },
-];
+const PLATES = [evidence1, evidence2, evidence3];
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+type Exhibit = { id: string; src: string; title: string; note: string; source: string };
 
 const CUE_ICON: Record<CueKind, typeof Droplet> = {
   blood: Droplet,
