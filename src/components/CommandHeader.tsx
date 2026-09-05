@@ -32,15 +32,15 @@ export function CommandHeader() {
         if (status === "SUBSCRIBED") {
           await channel.track({
             online_at: new Date().toISOString(),
-            alias: alias || user.email?.split("@")[0],
+            alias: alias || profile?.display_name || user?.email?.split("@")[0] || "Detective",
           });
         }
       });
 
     return () => {
-      channel.unsubscribe();
+      void channel.unsubscribe();
     };
-  }, [roomId, user, alias]);
+  }, [roomId, user?.id, user?.email, profile?.display_name, alias]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
