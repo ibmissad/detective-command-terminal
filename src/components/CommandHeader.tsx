@@ -7,6 +7,7 @@ import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 import { DatabaseConfigDialog } from "@/components/DatabaseConfigDialog";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { RoomTimer } from "@/components/RoomTimer";
 
 export function CommandHeader() {
   const { caseFile, elapsed, resetTimer, unlocked } = useCase();
