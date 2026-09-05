@@ -183,29 +183,44 @@ export function CaseBriefing() {
         </section>
 
         <section>
-          <span className="label-caps">Evidence Gallery</span>
-          <div className="mt-3 grid gap-4 sm:grid-cols-3">
-            {GALLERY.map((g) => (
-              <button
-                key={g.title}
-                onClick={() => setLightbox(g)}
-                className="panel group overflow-hidden rounded-md text-left"
-              >
-                <img
-                  src={g.src}
-                  alt={g.title}
-                  loading="lazy"
-                  width={1024}
-                  height={768}
-                  className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="px-4 py-3">
-                  <p className="font-mono text-sm text-gold">{g.title}</p>
-                  <p className="text-sm text-muted-foreground">{g.note}</p>
-                </div>
-              </button>
-            ))}
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <span className="label-caps">Evidence Gallery</span>
+            <span className="font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
+              {exhibits.length} exhibit{exhibits.length === 1 ? "" : "s"} logged · live
+            </span>
           </div>
+          {exhibits.length === 0 ? (
+            <div className="panel mt-3 rounded-md p-6 text-center text-muted-foreground">
+              No exhibits logged yet. Solve scene points to add evidence — it appears here for every
+              detective in the room instantly.
+            </div>
+          ) : (
+            <div className="mt-3 grid gap-4 sm:grid-cols-3">
+              {exhibits.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setLightbox(g)}
+                  className="panel group overflow-hidden rounded-md text-left"
+                >
+                  <img
+                    src={g.src}
+                    alt={g.title}
+                    loading="lazy"
+                    width={1024}
+                    height={768}
+                    className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="px-4 py-3">
+                    <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                      {g.source}
+                    </p>
+                    <p className="font-mono text-sm text-gold">{g.title}</p>
+                    <p className="line-clamp-3 text-sm text-muted-foreground">{g.note}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
 
         {caseFile.clues.length > 0 && (
