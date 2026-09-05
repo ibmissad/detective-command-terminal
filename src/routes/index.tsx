@@ -46,6 +46,7 @@ function Index() {
   return (
     <RoomProvider>
       <CaseProvider>
+      <TimerProvider>
       <RoomGate />
       <div className="min-h-screen">
         <CommandHeader />
