@@ -12,15 +12,17 @@ import { RoomTimer } from "@/components/RoomTimer";
 export function CommandHeader() {
   const { caseFile, elapsed, resetTimer, unlocked } = useCase();
   const { roomId, alias, online, members, leaveRoom, setOnline } = useRoom() as any; // fallback if setOnline exists, or manage via local effect
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   // Sync Supabase presence real-time state
   useEffect(() => {
-    if (!user || !roomId) return;
+    const userId = user?.id;
+    if (!userId || !roomId) return;
 
     const channel = supabase.channel(`room_${roomId}`, {
-      config: { presence: { key: user.id } },
+      config: { presence: { key: userId } },
     });
+
 
     channel
       .on("presence", { event: "sync" }, () => {
@@ -30,15 +32,15 @@ export function CommandHeader() {
         if (status === "SUBSCRIBED") {
           await channel.track({
             online_at: new Date().toISOString(),
-            alias: alias || user.email?.split("@")[0],
+            alias: alias || profile?.display_name || user?.email?.split("@")[0] || "Detective",
           });
         }
       });
 
     return () => {
-      channel.unsubscribe();
+      void channel.unsubscribe();
     };
-  }, [roomId, user, alias]);
+  }, [roomId, user?.id, user?.email, profile?.display_name, alias]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
