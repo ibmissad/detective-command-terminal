@@ -86,6 +86,53 @@ create table if not exists public.club_users (
   status text not null default 'pending'
 );
 
+-- Profile row automatically provisioned for every new signed-up account
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  display_name text,
+  email text,
+  role text not null default 'detective'
+);
+
+grant select, insert, update on public.profiles to authenticated;
+alter table public.profiles enable row level security;
+
+drop policy if exists "profiles read own" on public.profiles;
+create policy "profiles read own" on public.profiles
+  for select to authenticated using (auth.uid() = id);
+drop policy if exists "profiles insert own" on public.profiles;
+create policy "profiles insert own" on public.profiles
+  for insert to authenticated with check (auth.uid() = id);
+drop policy if exists "profiles update own" on public.profiles;
+create policy "profiles update own" on public.profiles
+  for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, display_name)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data ->> 'display_name', split_part(coalesce(new.email, 'detective'), '@', 1)))
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- Backfill any accounts created before the trigger existed
+insert into public.profiles (id, email, display_name)
+select u.id, u.email, split_part(coalesce(u.email, 'detective'), '@', 1)
+from auth.users u
+on conflict (id) do nothing;
+
 -- Saved / resumable room sessions
 create table if not exists public.sessions (
   id uuid primary key default gen_random_uuid(),
