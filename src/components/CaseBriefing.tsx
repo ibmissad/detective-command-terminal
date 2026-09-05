@@ -21,11 +21,10 @@ import {
   Lock,
 } from "lucide-react";
 
-const GALLERY = [
-  { src: evidence1, title: "Exhibit A — Case glass fragment", note: "Latent print, unmatched." },
-  { src: evidence2, title: "Exhibit B — Partial burned note", note: "Recovered from the grate." },
-  { src: evidence3, title: "Exhibit C — Impression cast", note: "Garden path, east side." },
-];
+const PLATES = [evidence1, evidence2, evidence3];
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+type Exhibit = { id: string; src: string; title: string; note: string; source: string };
 
 const CUE_ICON: Record<CueKind, typeof Droplet> = {
   blood: Droplet,
@@ -53,7 +52,29 @@ export function CaseBriefing() {
   const { caseFile, unlocked, unlock, addLog } = useCase();
   const [active, setActive] = useState<string | null>(null);
   const [puzzleFor_, setPuzzleFor] = useState<{ id: string; index: number } | null>(null);
-  const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
+  const [lightbox, setLightbox] = useState<Exhibit | null>(null);
+
+  // Exhibits come from the live case state: every clue in the active case file
+  // plus each hotspot the club has unlocked. Room broadcasts update this state,
+  // so new finds appear for everyone instantly, no refresh required.
+  const exhibits: Exhibit[] = [
+    ...caseFile.clues.map((c) => ({
+      id: `clue-${c.id}`,
+      src: PLATES[0]!,
+      title: c.title,
+      note: c.detail,
+      source: "Case file",
+    })),
+    ...caseFile.hotspots
+      .filter((h) => unlocked.includes(h.id))
+      .map((h) => ({
+        id: `spot-${h.id}`,
+        src: PLATES[0]!,
+        title: h.label,
+        note: h.detail,
+        source: "Recovered at scene",
+      })),
+  ].map((e, i) => ({ ...e, src: PLATES[i % PLATES.length]!, title: `Exhibit ${LETTERS[i % 26]} — ${e.title}` }));
 
   const activeSpot = caseFile.hotspots.find((h) => h.id === active) ?? null;
   const theme = sceneTheme(caseFile);
@@ -162,29 +183,44 @@ export function CaseBriefing() {
         </section>
 
         <section>
-          <span className="label-caps">Evidence Gallery</span>
-          <div className="mt-3 grid gap-4 sm:grid-cols-3">
-            {GALLERY.map((g) => (
-              <button
-                key={g.title}
-                onClick={() => setLightbox(g)}
-                className="panel group overflow-hidden rounded-md text-left"
-              >
-                <img
-                  src={g.src}
-                  alt={g.title}
-                  loading="lazy"
-                  width={1024}
-                  height={768}
-                  className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="px-4 py-3">
-                  <p className="font-mono text-sm text-gold">{g.title}</p>
-                  <p className="text-sm text-muted-foreground">{g.note}</p>
-                </div>
-              </button>
-            ))}
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <span className="label-caps">Evidence Gallery</span>
+            <span className="font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
+              {exhibits.length} exhibit{exhibits.length === 1 ? "" : "s"} logged · live
+            </span>
           </div>
+          {exhibits.length === 0 ? (
+            <div className="panel mt-3 rounded-md p-6 text-center text-muted-foreground">
+              No exhibits logged yet. Solve scene points to add evidence — it appears here for every
+              detective in the room instantly.
+            </div>
+          ) : (
+            <div className="mt-3 grid gap-4 sm:grid-cols-3">
+              {exhibits.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => setLightbox(g)}
+                  className="panel group overflow-hidden rounded-md text-left"
+                >
+                  <img
+                    src={g.src}
+                    alt={g.title}
+                    loading="lazy"
+                    width={1024}
+                    height={768}
+                    className="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="px-4 py-3">
+                    <p className="font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+                      {g.source}
+                    </p>
+                    <p className="font-mono text-sm text-gold">{g.title}</p>
+                    <p className="line-clamp-3 text-sm text-muted-foreground">{g.note}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
 
         {caseFile.clues.length > 0 && (
