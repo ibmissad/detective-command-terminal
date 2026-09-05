@@ -52,7 +52,29 @@ export function CaseBriefing() {
   const { caseFile, unlocked, unlock, addLog } = useCase();
   const [active, setActive] = useState<string | null>(null);
   const [puzzleFor_, setPuzzleFor] = useState<{ id: string; index: number } | null>(null);
-  const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
+  const [lightbox, setLightbox] = useState<Exhibit | null>(null);
+
+  // Exhibits come from the live case state: every clue in the active case file
+  // plus each hotspot the club has unlocked. Room broadcasts update this state,
+  // so new finds appear for everyone instantly, no refresh required.
+  const exhibits: Exhibit[] = [
+    ...caseFile.clues.map((c) => ({
+      id: `clue-${c.id}`,
+      src: PLATES[0]!,
+      title: c.title,
+      note: c.detail,
+      source: "Case file",
+    })),
+    ...caseFile.hotspots
+      .filter((h) => unlocked.includes(h.id))
+      .map((h) => ({
+        id: `spot-${h.id}`,
+        src: PLATES[0]!,
+        title: h.label,
+        note: h.detail,
+        source: "Recovered at scene",
+      })),
+  ].map((e, i) => ({ ...e, src: PLATES[i % PLATES.length]!, title: `Exhibit ${LETTERS[i % 26]} — ${e.title}` }));
 
   const activeSpot = caseFile.hotspots.find((h) => h.id === active) ?? null;
   const theme = sceneTheme(caseFile);
