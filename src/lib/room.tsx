@@ -28,7 +28,8 @@ export type RoomEvent =
       timer: { durationMs: number; remainingMs: number; running: boolean; locked: boolean };
     }
   | { type: "sync-request"; by: string }
-  | { type: "sync-state"; caseFile: CaseFile; log: LogEntry[]; unlocked: string[] };
+  | { type: "sync-state"; caseFile: CaseFile; log: LogEntry[]; unlocked: string[] }
+  | { type: "reset" };
 
 type Member = { alias: string; host: boolean };
 
