@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { makeRoomCode, useRoom } from "@/lib/room";
-import { readDbConfig } from "@/lib/db";
+import { isDbConfigured } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatabaseConfigDialog } from "./DatabaseConfigDialog";
 import { toast } from "sonner";
 import { Radio } from "lucide-react";
+import { HowToPlay } from "./HowToPlay";
 
 export function RoomGate() {
   const { joined, hostRoom, joinRoom, online } = useRoom();
@@ -20,7 +21,7 @@ export function RoomGate() {
   );
   const [joinAlias, setJoinAlias] = useState("");
 
-  const dbReady = Boolean(readDbConfig().url && readDbConfig().anonKey);
+  const dbReady = isDbConfigured();
 
   const handleHost = (e: FormEvent) => {
     e.preventDefault();
@@ -63,6 +64,8 @@ export function RoomGate() {
             Host the projector screen or join from your phone with the room's 4-digit access code.
           </DialogDescription>
         </DialogHeader>
+
+        <HowToPlay />
 
         {!dbReady && (
           <div className="rounded border border-gold-dim bg-surface-2 px-4 py-3 text-sm text-foreground/80">
