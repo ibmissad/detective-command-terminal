@@ -57,7 +57,7 @@ export function GameMasterConsole() {
       return;
     }
     if (!apiKey && !import.meta.env["VITE_OPENROUTER_API_KEY"]) {
-      toast.error("Add your Gemini API key first.");
+      toast.error("Add your OpenRouter API key first.");
       return;
     }
     setBusy(true);
