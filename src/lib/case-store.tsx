@@ -12,6 +12,13 @@ import type { CaseFile, LogEntry, Verdict } from "./case-types";
 import { DEFAULT_CASE } from "./default-case";
 import { useRoom } from "./room";
 
+const KEY_THREADS = "scc.threads";
+
+function clearThreadsLocally() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(KEY_THREADS);
+  window.dispatchEvent(new Event("scc-threads"));
+}
 
 const KEY_CASE = "scc.case";
 const KEY_LOG = "scc.log";
@@ -126,7 +133,22 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           });
         else if (e.type === "case") {
           setCaseFileState(e.caseFile);
+          setLog([]);
+          setUnlocked([]);
+          setVerdictState(null);
           persist(KEY_CASE, e.caseFile);
+          persist(KEY_LOG, []);
+          persist(KEY_UNLOCKED, []);
+          persist(KEY_VERDICT, null);
+          clearThreadsLocally();
+        } else if (e.type === "reset") {
+          setLog([]);
+          setUnlocked([]);
+          setVerdictState(null);
+          persist(KEY_LOG, []);
+          persist(KEY_UNLOCKED, []);
+          persist(KEY_VERDICT, null);
+          clearThreadsLocally();
         } else if (e.type === "verdict") {
           setVerdictState(e.verdict);
           persist(KEY_VERDICT, e.verdict);
@@ -150,7 +172,17 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       caseFile,
       setCaseFile: (c) => {
         setCaseFileState(c);
+        setLog([]);
+        setUnlocked([]);
+        setVerdictState(null);
+        const s = Date.now();
+        setStartedAt(s);
         persist(KEY_CASE, c);
+        persist(KEY_LOG, []);
+        persist(KEY_UNLOCKED, []);
+        persist(KEY_VERDICT, null);
+        persist(KEY_START, s);
+        clearThreadsLocally();
         publish({ type: "case", caseFile: c });
       },
       log,
@@ -208,6 +240,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         persist(KEY_UNLOCKED, []);
         persist(KEY_VERDICT, null);
         persist(KEY_START, s);
+        clearThreadsLocally();
+        publish({ type: "reset" });
       },
     }),
     [caseFile, log, unlocked, apiKey, verdict, now, startedAt, hydrated, addLog, persist, publish],
