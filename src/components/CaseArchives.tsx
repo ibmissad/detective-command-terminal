@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listSessions, listTranscript, listVerdicts, readDbConfig, type SavedSession } from "@/lib/db";
+import { listSessions, listTranscript, listVerdicts, isDbConfigured, type SavedSession } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Archive, Trophy, MessagesSquare } from "lucide-react";
 import { toast } from "sonner";
@@ -14,8 +14,7 @@ export function CaseArchives() {
   const [transcript, setTranscript] = useState<TranscriptRow[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const envUrl = import.meta.env["VITE_SUPABASE_URL"] || "";
-  const dbReady = Boolean(envUrl || readDbConfig().url);
+  const dbReady = isDbConfigured();
 
   const load = () => {
     if (!dbReady) return;
