@@ -142,15 +142,15 @@ export function CaseBriefing() {
                   aria-label={`${found ? "Review" : "Investigate"} ${h.label} — ${CUE_LABEL[cue]}`}
                   title={found ? h.label : `${CUE_LABEL[cue]} · locked`}
                   style={{ left: `${h.x}%`, top: `${h.y}%` }}
-                  className={`absolute flex min-h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-full border-2 px-3 py-2 backdrop-blur-sm transition-transform hover:scale-110 ${
+                  className={`absolute flex min-h-11 -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border-2 px-2.5 py-2 backdrop-blur-sm transition-transform active:scale-95 sm:hover:scale-110 sm:gap-2 sm:px-3 ${
                     found
                       ? "border-gold bg-gold/25 text-gold"
-                      : "hotspot-pulse border-gold bg-background/75 text-gold"
+                      : "hotspot-pulse border-gold bg-background/90 text-gold"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden font-mono text-[0.65rem] uppercase tracking-widest sm:inline">
-                    {found ? h.label.slice(0, 18) : CUE_LABEL[cue]}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="font-mono text-[0.6rem] uppercase tracking-widest sm:text-[0.65rem]">
+                    {found ? h.label.slice(0, 14) : CUE_LABEL[cue].slice(0, 10)}
                   </span>
                 </button>
               );
@@ -240,7 +240,7 @@ export function CaseBriefing() {
         )}
       </div>
 
-      <CaseLog className="h-[26rem] sm:h-[42rem] xl:sticky xl:top-6" />
+      <CaseLog className="max-h-[65vh] sm:h-[42rem] sm:max-h-none xl:sticky xl:top-6" />
 
       <Dialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)}>
         <DialogContent className="max-w-4xl border-border bg-surface">
