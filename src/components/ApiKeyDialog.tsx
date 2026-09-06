@@ -38,7 +38,7 @@ export function ApiKeyDialog() {
       <DialogContent className="border-border bg-surface">
         <DialogHeader>
           <DialogTitle className="text-gold flex items-center gap-2">
-            <KeyRound className="h-5 w-5" /> Gemini API Key
+            <KeyRound className="h-5 w-5" /> OpenRouter API Key
           </DialogTitle>
           <DialogDescription>
             {isEnvActive ? (
