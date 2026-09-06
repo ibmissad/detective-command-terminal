@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { listUsers, setUserStatus, type ClubUser } from "@/lib/auth";
-import { readDbConfig } from "@/lib/db";
+import { isDbConfigured } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { UserCheck, UserX, Users } from "lucide-react";
@@ -8,7 +8,7 @@ import { UserCheck, UserX, Users } from "lucide-react";
 export function AdminUsers() {
   const [users, setUsers] = useState<ClubUser[]>([]);
   const [loading, setLoading] = useState(false);
-  const dbReady = Boolean(readDbConfig().url && readDbConfig().anonKey);
+  const dbReady = isDbConfigured();
 
   const load = useCallback(() => {
     if (!dbReady) return;
