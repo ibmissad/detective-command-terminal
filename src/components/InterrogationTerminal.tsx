@@ -100,7 +100,7 @@ export function InterrogationTerminal() {
     const question = input.trim();
     if (!question || !suspect || busy) return;
     if (!effectiveApiKey) {
-      toast.error("Gemini API key is missing. Add your API key in the top header.");
+      toast.error("OpenRouter API key is missing. Add your key in the top header.");
       return;
     }
 
