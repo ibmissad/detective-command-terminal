@@ -1,115 +1,156 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CaseProvider } from "@/lib/case-store";
-import { RoomProvider } from "@/lib/room";
-import { TimerProvider } from "@/lib/timer";
-import { RoomGate } from "@/components/RoomGate";
-import { CommandHeader } from "@/components/CommandHeader";
-import { CaseBriefing } from "@/components/CaseBriefing";
-import { InterrogationTerminal } from "@/components/InterrogationTerminal";
-import { GameMasterConsole } from "@/components/GameMasterConsole";
-import { VerdictConsole } from "@/components/VerdictConsole";
-import { CaseArchives } from "@/components/CaseArchives";
-import { PresenceBar } from "@/components/PresenceBar";
-import { HostGate } from "@/components/HostGate";
-import { useRoom } from "@/lib/room";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Database, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+import { readDbConfig, writeDbConfig, getDb, isDbConfigured, SCHEMA_SQL } from "@/lib/db";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Sherlock Command Center — Live Detective Club Console" },
-      {
-        name: "description",
-        content:
-          "A projector-ready noir command center for detective clubs: case briefings, interactive scene hotspots, AI suspect interrogations, and a verdict reveal.",
-      },
-      { property: "og:title", content: "Sherlock Command Center" },
-      {
-        property: "og:description",
-        content:
-          "Run live detective club meetings: case files, scene hotspots, AI interrogations, and instant verdict post-mortems.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
-});
+export function DatabaseConfigDialog() {
+  const [open, setOpen] = useState(false);
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  const envAnon = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+  const envReady = Boolean(envUrl && envAnon);
 
-const PLAYER_TABS = [
-  { value: "briefing", label: "Case Briefing" },
-  { value: "interrogation", label: "Interrogation" },
-  { value: "verdict", label: "Verdict" },
-];
+  const [url, setUrl] = useState("");
+  const [anonKey, setAnonKey] = useState("");
+  const [showOverride, setShowOverride] = useState(!envReady);
+  const [testing, setTesting] = useState(false);
 
-const HOST_ONLY_TABS = [
-  { value: "gm", label: "Game Master" },
-  { value: "archives", label: "Case Archives" },
-];
+  const connected = isDbConfigured();
 
-function Index() {
-  return (
-    <RoomProvider>
-      <CaseProvider>
-      <TimerProvider>
-      <RoomGate />
-      <div className="min-h-screen">
-        <CommandHeader />
-        <main className="mx-auto max-w-[110rem] px-3 py-5 sm:px-6 sm:py-8">
-          <PresenceBar />
-          <MainTabs />
-        </main>
-      </div>
-      </TimerProvider>
-      </CaseProvider>
-    </RoomProvider>
-  );
-}
-
-function MainTabs() {
-  const { isHost } = useRoom();
-  const tabs = isHost ? [...PLAYER_TABS, ...HOST_ONLY_TABS] : PLAYER_TABS;
+  const test = async () => {
+    setTesting(true);
+    try {
+      const db = getDb();
+      if (!db) throw new Error("No database configured yet.");
+      const { error } = await db.from("cases").select("id").limit(1);
+      if (error) throw new Error(error.message);
+      toast.success("Connection OK — tables reachable.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Connection failed.");
+    } finally {
+      setTesting(false);
+    }
+  };
 
   return (
-    <Tabs defaultValue="briefing" className="mt-4 sm:mt-6">
-      <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
-        <TabsList className="h-auto w-max min-w-full justify-start gap-1 bg-transparent p-0 sm:gap-2">
-          {tabs.map((t) => (
-            <TabsTrigger
-              key={t.value}
-              value={t.value}
-              className="min-h-11 shrink-0 rounded-none border-b-2 border-transparent px-3 py-3 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground data-[state=active]:border-gold data-[state=active]:bg-transparent data-[state=active]:text-gold data-[state=active]:shadow-none sm:px-6 sm:text-sm sm:tracking-[0.18em]"
-            >
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </div>
-      <div className="mt-5 sm:mt-8">
-        <TabsContent value="briefing">
-          <CaseBriefing />
-        </TabsContent>
-        <TabsContent value="interrogation">
-          <InterrogationTerminal />
-        </TabsContent>
-        <TabsContent value="verdict">
-          <VerdictConsole />
-        </TabsContent>
-        {isHost && (
-          <>
-            <TabsContent value="gm">
-              <HostGate>
-                <GameMasterConsole />
-              </HostGate>
-            </TabsContent>
-            <TabsContent value="archives">
-              <HostGate>
-                <CaseArchives />
-              </HostGate>
-            </TabsContent>
-          </>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (o) {
+          const cfg = readDbConfig();
+          setUrl(cfg.url);
+          setAnonKey(cfg.anonKey);
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="border-gold-dim text-gold">
+          <Database className="mr-1 h-4 w-4" />
+          {connected ? "Database active" : "Database setup"}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-surface sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-gold flex items-center gap-2">
+            <Database className="h-5 w-5" /> Database Configuration
+          </DialogTitle>
+          <DialogDescription>
+            {envReady ? (
+              <span className="flex items-center gap-1 text-success font-medium">
+                <CheckCircle className="h-4 w-4" /> Connected automatically via Vercel environment
+                variables. No setup needed here.
+              </span>
+            ) : (
+              "No environment variables detected. Enter your Supabase project details below."
+            )}
+          </DialogDescription>
+        </DialogHeader>
+
+        {envReady && !showOverride && (
+          <Button variant="ghost" size="sm" className="w-fit" onClick={() => setShowOverride(true)}>
+            Use a different database instead
+          </Button>
         )}
-      </div>
-    </Tabs>
+
+        {(showOverride || !envReady) && (
+          <div className="space-y-4">
+            <div>
+              <label className="label-caps">Project URL</label>
+              <Input
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://xxxxx.supabase.co"
+                className="mt-1 h-12 border-border bg-surface-2 font-mono"
+              />
+            </div>
+            <div>
+              <label className="label-caps">Anon / publishable key</label>
+              <Input
+                type="password"
+                autoComplete="off"
+                value={anonKey}
+                onChange={(e) => setAnonKey(e.target.value)}
+                placeholder="eyJ… or sb_publishable_…"
+                className="mt-1 h-12 border-border bg-surface-2 font-mono"
+              />
+            </div>
+            <div className="flex flex-wrap justify-between gap-2 pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  writeDbConfig({ url: "", anonKey: "" });
+                  setUrl("");
+                  setAnonKey("");
+                  toast.success("Override cleared — back to environment defaults.");
+                }}
+              >
+                Clear override
+              </Button>
+              <Button
+                onClick={() => {
+                  writeDbConfig({ url, anonKey });
+                  toast.success("Override saved for this browser.");
+                }}
+              >
+                Save override
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="pt-4">
+          <div className="flex items-center justify-between">
+            <span className="label-caps">Schema SQL Reference</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                void navigator.clipboard.writeText(SCHEMA_SQL);
+                toast.success("Schema SQL copied.");
+              }}
+            >
+              Copy SQL
+            </Button>
+          </div>
+          <pre className="mt-2 max-h-48 overflow-auto rounded border border-border bg-surface-2 p-3 font-mono text-xs leading-relaxed text-foreground/80">
+            {SCHEMA_SQL}
+          </pre>
+        </div>
+
+        <Button variant="outline" onClick={test} disabled={testing}>
+          {testing ? "Testing…" : "Test connection"}
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 }
